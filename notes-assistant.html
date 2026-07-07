@@ -6,81 +6,194 @@
   <title>Nona</title>
   <style>
     :root{
-      --bg:#f6f1e8;
-      --panel:#fffaf1;
-      --panel-2:#f1e7d6;
-      --text:#1f1b16;
-      --muted:#665b4f;
-      --accent:#b65c2c;
-      --accent-2:#276b5f;
-      --line:#ddcfbf;
-      --shadow:0 18px 50px rgba(50,30,10,.12);
-      --radius:22px;
+      --bg:#8ea0b4;
+      --panel:#ece9d8;
+      --panel-2:#dcdcdc;
+      --text:#1f1f1f;
+      --muted:#5f5f5f;
+      --accent:#3a6ea5;
+      --accent-2:#6c9ad0;
+      --accent-3:#b83e3e;
+      --accent-4:#2f7f73;
+      --line:#7f9db9;
+      --shadow:0 10px 22px rgba(0,0,0,.22);
+      --radius:0;
     }
     *{box-sizing:border-box}
     body{
       margin:0;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      font-family: "Trebuchet MS", "Segoe UI", Arial, sans-serif;
       color:var(--text);
       background:
-        radial-gradient(circle at top left, rgba(182,92,44,.10), transparent 30%),
-        radial-gradient(circle at top right, rgba(39,107,95,.12), transparent 24%),
-        linear-gradient(180deg, #f8f3ea 0%, #efe4d0 100%);
+        linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,0)),
+        radial-gradient(circle at 20% 20%, rgba(255,255,255,.12), transparent 18%),
+        linear-gradient(180deg, #6f87a1 0%, #879db5 40%, #a8b8c8 100%);
       min-height:100vh;
     }
-    .wrap{max-width:1280px;margin:0 auto;padding:28px}
+    body::before{
+      content:"";
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      background:
+        linear-gradient(transparent, rgba(255,255,255,.06)),
+        repeating-linear-gradient(45deg, rgba(255,255,255,.03), rgba(255,255,255,.03) 2px, transparent 2px, transparent 8px);
+      opacity:.45;
+    }
+    .wrap{max-width:1320px;margin:0 auto;padding:28px 26px 36px}
     header{
       display:flex;justify-content:space-between;gap:16px;align-items:end;flex-wrap:wrap;
       margin-bottom:22px;
     }
-    h1{margin:0;font-size:clamp(28px,4vw,48px);letter-spacing:-.03em}
+    h1{
+      margin:0;
+      font-size:clamp(28px,4vw,52px);
+      letter-spacing:-.04em;
+      text-shadow:none;
+    }
     .sub{color:var(--muted);max-width:760px;line-height:1.5}
     .grid{display:grid;grid-template-columns:1.2fr .8fr;gap:18px}
     @media (max-width: 960px){.grid{grid-template-columns:1fr}}
     .card{
-      background:rgba(255,250,241,.86);
-      border:1px solid rgba(221,207,191,.95);
+      background:var(--panel);
+      border:1px solid #fff;
+      border-top-color:#fefefe;
+      border-left-color:#fefefe;
+      border-right-color:#6d6d6d;
+      border-bottom-color:#6d6d6d;
       border-radius:var(--radius);
-      box-shadow:var(--shadow);
+      box-shadow:inset 1px 1px 0 rgba(255,255,255,.85), inset -1px -1px 0 rgba(0,0,0,.12), var(--shadow);
       overflow:hidden;
-      backdrop-filter: blur(8px);
+      backdrop-filter: blur(6px);
+      position:relative;
+      isolation:isolate;
     }
-    .card h2{margin:0;font-size:18px}
+    .card::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      border-radius:inherit;
+      pointer-events:none;
+      background:linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,0));
+      opacity:.45;
+    }
+    .card h2{margin:0;font-size:18px;letter-spacing:.01em}
     .card-head{
       padding:18px 20px;
-      border-bottom:1px solid var(--line);
+      border-bottom:1px solid #aeb7c3;
       display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;
-      background:linear-gradient(180deg, rgba(255,255,255,.45), rgba(255,255,255,0));
+      background:linear-gradient(180deg, #e5eef8, #c8d8eb);
     }
     .card-body{padding:20px}
-    .toolbar{display:flex;gap:10px;flex-wrap:wrap}
+    .board{
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap:18px;
+      align-items:start;
+    }
+    @media (max-width: 960px){.board{grid-template-columns:1fr}}
+    .hero{
+      padding:6px 2px 18px;
+      display:flex;
+      justify-content:space-between;
+      align-items:end;
+      gap:14px;
+      flex-wrap:wrap;
+    }
+    .hero h1{
+      font-family: Georgia, "Times New Roman", serif;
+      font-size:clamp(30px,4.4vw,60px);
+      letter-spacing:-.05em;
+      line-height: .95;
+      color:#28170f;
+      text-shadow:0 1px 0 rgba(255,255,255,.38), 0 10px 22px rgba(73,43,18,.08);
+    }
+    .hero-sub{display:none}
+    .toolbar{display:none}
     .pill,.btn,.chip{
-      border:1px solid var(--line);
-      background:#fff;
+      border:1px solid #fff;
+      border-top-color:#ffffff;
+      border-left-color:#ffffff;
+      border-right-color:#7e7e7e;
+      border-bottom-color:#7e7e7e;
+      background:linear-gradient(180deg, #f7f7f7, #dedede);
       color:var(--text);
-      border-radius:999px;
+      border-radius:0;
       padding:10px 14px;
       font-weight:600;
       cursor:pointer;
       transition:.18s ease;
     }
-    .pill:hover,.btn:hover,.chip:hover{transform:translateY(-1px);border-color:#c2b39e}
-    .btn.primary{background:var(--accent);color:white;border-color:transparent}
-    .btn.secondary{background:var(--accent-2);color:white;border-color:transparent}
+    .pill:hover,.btn:hover,.chip:hover{transform:translateY(-1px)}
+    .btn.primary{background:linear-gradient(180deg, #e9e9e9, #cfcfcf);color:#1f1f1f}
+    .btn.secondary{background:linear-gradient(180deg, #9cc0ea, #588dc6);color:white;border-color:#315f98}
+    .btn.newnote{
+      width:auto;
+      flex:1 1 0;
+      padding:14px 16px;
+      font-size:16px;
+      background:linear-gradient(180deg, #d85a4f, #b63b30);
+      color:#fff;
+      border-color:#7e2b23;
+      letter-spacing:.04em;
+      box-shadow:inset 1px 1px 0 rgba(255,255,255,.4), 0 10px 22px rgba(0,0,0,.12);
+    }
+    .actions-row{
+      display:flex;
+      gap:12px;
+      align-items:stretch;
+      margin-top:2px;
+      flex-wrap:wrap;
+    }
+    .actions-row .btn.secondary{
+      flex:1 1 0;
+      min-width:180px;
+      padding:14px 16px;
+      font-size:15px;
+    }
+    .actions-row .btn.voice{
+      flex:0 0 78px;
+      min-width:78px;
+      padding:14px 16px;
+      font-size:18px;
+      background:linear-gradient(180deg, #d8d8d8, #bbbbbb);
+      color:#1f1f1f;
+      border-color:#6f6f6f;
+      box-shadow:inset 1px 1px 0 rgba(255,255,255,.4), 0 8px 18px rgba(0,0,0,.12);
+    }
     .field{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
     label{font-size:13px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em}
     input,select,textarea{
       width:100%;
-      border:1px solid var(--line);
-      border-radius:16px;
+      border:1px solid #7f9db9;
+      border-radius:0;
       padding:13px 14px;
       font:inherit;
-      background:white;
+      background:linear-gradient(180deg, #fff, #efefef);
       color:var(--text);
       outline:none;
+      box-shadow:inset 1px 1px 0 rgba(255,255,255,.95);
+    }
+    input::placeholder,textarea::placeholder{color:#7a7a7a}
+    select{
+      appearance:none;
+      background-image:
+        linear-gradient(45deg, transparent 50%, #3a4d68 50%),
+        linear-gradient(135deg, #3a4d68 50%, transparent 50%),
+        linear-gradient(180deg, #fff, #efefef);
+      background-position:
+        calc(100% - 20px) 50%,
+        calc(100% - 14px) 50%,
+        0 0;
+      background-size:6px 6px, 6px 6px, 100% 100%;
+      background-repeat:no-repeat;
+      padding-right:42px;
     }
     textarea{min-height:220px;resize:vertical;line-height:1.45}
-    input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 4px rgba(182,92,44,.10)}
+    input:focus,select:focus,textarea:focus{
+      border-color:#3a6ea5;
+      box-shadow:0 0 0 3px rgba(58,110,165,.18), inset 1px 1px 0 rgba(255,255,255,.88);
+    }
     .meta{display:grid;grid-template-columns:1fr 1fr;gap:14px}
     @media (max-width:700px){.meta{grid-template-columns:1fr}}
     .suggestions,.notes{
@@ -88,17 +201,150 @@
       gap:12px;
     }
     .item{
-      background:var(--panel);
-      border:1px solid var(--line);
-      border-radius:18px;
+      background:linear-gradient(180deg, #fdfdfd, #e6e6e6);
+      border:1px solid #7f7f7f;
+      border-radius:0;
       padding:14px;
+      box-shadow:inset 1px 1px 0 rgba(255,255,255,.95);
     }
     .item-title{display:flex;justify-content:space-between;gap:12px;align-items:start}
     .item-title strong{font-size:15px}
     .muted{color:var(--muted);font-size:13px;line-height:1.45}
     .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-    .chip{padding:6px 10px;font-size:12px;background:#fff7ef}
+    .chip{
+      padding:6px 10px;
+      font-size:12px;
+      background:linear-gradient(180deg, #fefefe, #dcdcdc);
+      border-color:#7f7f7f;
+    }
     .tag{font-size:12px;font-weight:800;color:var(--accent-2)}
+    .chip.theme-live{
+      background:linear-gradient(180deg, #f6f6f6, #d7d7d7);
+      border-color:#7f7f7f;
+      color:#1f1f1f;
+      font-weight:900;
+      box-shadow:inset 1px 1px 0 rgba(255,255,255,.95);
+    }
+    .theme-banner{
+      margin:0 0 14px;
+      padding:14px 16px;
+      border-radius:20px;
+      background:
+        linear-gradient(180deg, #fdf8e7, #f2dfb0);
+      border:2px solid #e0c36b;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      box-shadow:inset 1px 1px 0 rgba(255,255,255,.9), 0 8px 18px rgba(0,0,0,.12);
+    }
+    .theme-banner .label{
+      font-size:11px;
+      text-transform:uppercase;
+      letter-spacing:.16em;
+      color:var(--muted);
+      font-weight:800;
+    }
+    .theme-banner .value{
+      font-size:22px;
+      font-weight:900;
+      color:#2a2a2a;
+    }
+    .theme-banner .hint{
+      max-width:250px;
+      text-align:right;
+    }
+    .theme-banner.flash{animation: themePulse .65s ease}
+    @keyframes themePulse{
+      0%{transform:scale(.99); box-shadow:0 0 0 rgba(0,0,0,0)}
+      45%{transform:scale(1.01); box-shadow:0 0 0 8px rgba(224,195,107,.18)}
+      100%{transform:scale(1); box-shadow:0 0 0 rgba(0,0,0,0)}
+    }
+    .manual-theme-wrap{display:none}
+    .manual-theme-wrap.hidden{display:none}
+    .note-toolbar{
+      display:flex;
+      gap:12px;
+      align-items:stretch;
+      margin-top:2px;
+      flex-wrap:nowrap;
+    }
+    .note-toolbar .btn{min-height:54px}
+    .note-toolbar .btn.secondary{flex:1 1 0}
+    .note-toolbar .btn.newnote{flex:1.15 1 0}
+    .note-toolbar .btn.voice{flex:0 0 78px}
+    .note-toolbar .btn.analyze{flex:1.15 1 0}
+    .note-toolbar .btn.promo{
+      background:linear-gradient(180deg, #c53b2b, #98251a);
+      color:#fff;
+      border-color:transparent;
+      box-shadow:0 10px 24px rgba(152,37,26,.22);
+    }
+    .note-toolbar .btn.analyze{
+      background:linear-gradient(180deg, #f6f8fb, #d7e3f1);
+      color:#1c2f45;
+      border-color:#5b7895;
+      box-shadow:inset 1px 1px 0 rgba(255,255,255,.86), 0 10px 24px rgba(0,0,0,.12);
+      text-shadow:none;
+    }
+    .note-toolbar .btn.analyze:hover,.note-toolbar .btn.promo:hover,.note-toolbar .btn.voice:hover{transform:translateY(-1px)}
+    .note-actions{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      margin-top:10px;
+    }
+    .note-actions .btn{min-height:46px;width:100%}
+    .note-actions .btn.save-wide{
+      min-height:52px;
+      font-size:15px;
+      background:linear-gradient(180deg, #d9ebff, #7aa7d9);
+      color:#10263f;
+      border-color:#4b6d93;
+      box-shadow:inset 1px 1px 0 rgba(255,255,255,.86), 0 10px 24px rgba(0,0,0,.12);
+    }
+    .note-actions .btn.ghost{
+      background:linear-gradient(180deg, #f3f3f3, #d9d9d9);
+    }
+    .saved-note-actions{
+      display:flex;
+      gap:8px;
+      margin-top:12px;
+      flex-wrap:wrap;
+    }
+    .saved-note-actions .btn{
+      padding:8px 12px;
+      font-size:12px;
+    }
+    .btn.icon-danger{
+      background:linear-gradient(180deg, #f6f6f6, #d3d3d3);
+      color:#8e2d21;
+      border-color:#7f7f7f;
+    }
+    .card.tech{
+      background:
+        linear-gradient(180deg, #f0f0f0, #dadada),
+        radial-gradient(circle at top left, rgba(58,110,165,.12), transparent 30%),
+        radial-gradient(circle at bottom right, rgba(120,120,120,.08), transparent 28%);
+      position:relative;
+    }
+    .card.tech .card-head{
+      background:
+        linear-gradient(180deg, #d4d4d4, #bababa);
+    }
+    .card.tech .card-body{
+      background:
+        linear-gradient(180deg, #efefef, #dedede);
+    }
+    .item{
+      background:linear-gradient(180deg, #fdfdfd, #e6e6e6);
+      border:1px solid #7f7f7f;
+      box-shadow:inset 1px 1px 0 rgba(255,255,255,.95);
+    }
+    .item .tag{
+      color:#3a6ea5;
+      text-shadow:0 1px 0 rgba(255,255,255,.55);
+    }
     .layout{display:grid;grid-template-columns:1fr;gap:18px}
     .note-preview{white-space:pre-wrap;line-height:1.5}
     .split{display:grid;grid-template-columns:1fr 1fr;gap:14px}
@@ -106,66 +352,79 @@
     .toplist{display:flex;gap:8px;flex-wrap:wrap}
     .tiny{font-size:12px;color:var(--muted)}
     .danger{background:#fff1ee;color:#8c2b1c}
+    details.advanced{
+      margin-top:12px;
+      border:1px solid #7f7f7f;
+      border-radius:0;
+      padding:10px 12px;
+      background:linear-gradient(180deg, #f0f0f0, #dcdcdc);
+    }
+    details.advanced > summary{
+      cursor:pointer;
+      font-weight:700;
+      color:#1f1f1f;
+      list-style:none;
+    }
+    details.advanced > summary::-webkit-details-marker{display:none}
+    .advanced-grid{margin-top:12px}
+    .toast{
+      position:fixed;
+      left:50%;
+      top:18px;
+      transform:translateX(-50%);
+      background:#000080;
+      color:#fff;
+      padding:10px 14px;
+      border-radius:999px;
+      box-shadow:0 12px 35px rgba(0,0,0,.18);
+      opacity:0;
+      pointer-events:none;
+      transition:opacity .2s ease, transform .2s ease;
+      z-index:50;
+      font-size:13px;
+    }
+    .toast.show{
+      opacity:1;
+      transform:translateX(-50%) translateY(4px);
+    }
+    .notes .item-title .btn{
+      padding:7px 10px;
+      font-size:12px;
+    }
   </style>
 </head>
 <body>
+  <div class="toast" id="toast"></div>
   <div class="wrap">
-    <header>
+    <header class="hero">
       <div>
         <h1>Nona</h1>
-        <div class="sub">Prise de note rapide, classement par thème ou société, et relances intelligentes pour ne rien oublier côté admin, finance ou légal. Le prototype peut utiliser une vraie IA OpenAI et une liste de sociétés préchargée depuis ton SharePoint juridique.</div>
       </div>
-      <div class="toolbar">
-        <button class="pill" id="demoFill">Charger un exemple</button>
-        <button class="pill" id="exportData">Exporter JSON</button>
-        <button class="pill" id="clearAll">Tout effacer</button>
-      </div>
+      <div class="toolbar"></div>
     </header>
 
-    <div class="grid">
-      <section class="card">
-        <div class="card-head">
+    <div class="board">
+      <section class="card tech">
+          <div class="card-head">
           <h2>Nouvelle note</h2>
           <div class="tiny" id="status">Analyse prête</div>
         </div>
         <div class="card-body">
-          <div class="meta">
-            <div class="field">
-              <label for="openaiKey">Clé OpenAI API</label>
-              <input id="openaiKey" type="password" placeholder="sk-..." />
+          <div class="theme-banner" id="themeBanner">
+            <div>
+              <div class="label">Thème détecté</div>
+              <div class="value" id="themeBannerValue">Auto</div>
             </div>
-            <div class="field">
-              <label for="openaiModel">Modèle</label>
-              <select id="openaiModel">
-                <option value="gpt-4.1-mini">gpt-4.1-mini</option>
-                <option value="gpt-5">gpt-5</option>
-                <option value="o3">o3</option>
-              </select>
-            </div>
+            <div class="tiny" id="themeBannerHint">L’analyse n’a pas encore été lancée.</div>
           </div>
-          <div class="field">
-            <label for="apiBaseUrl">URL du backend IA</label>
-            <input id="apiBaseUrl" placeholder="http://localhost:8787" />
-          </div>
-          <div class="tiny" style="margin:-4px 0 12px">La clé est stockée uniquement dans ton navigateur si tu l’enregistres localement.</div>
           <div class="meta">
             <div class="field">
               <label for="company">Société</label>
               <select id="company"></select>
             </div>
-            <div class="field">
+            <div class="field manual-theme-wrap hidden">
               <label for="manualTheme">Thème manuel</label>
               <select id="manualTheme"></select>
-            </div>
-          </div>
-          <div class="meta">
-            <div class="field">
-              <label for="newCompany">Ajouter une société</label>
-              <input id="newCompany" placeholder="Ex. SCI, magasin, holding, logistique..." />
-            </div>
-            <div class="field" style="justify-content:end">
-              <label style="opacity:0">Action</label>
-              <button class="btn" id="addCompanyBtn">Ajouter la société</button>
             </div>
           </div>
           <div class="field">
@@ -176,23 +435,60 @@
             <label for="note">Note</label>
             <textarea id="note" placeholder="Écris ici ta note de réunion, ton idée ou ton sujet..."></textarea>
           </div>
-          <div class="split">
-            <button class="btn primary" id="analyzeBtn">Analyser la note</button>
-            <button class="btn secondary" id="analyzeAiBtn">Analyse IA</button>
-            <button class="btn secondary" id="saveBtn">Enregistrer la note</button>
+          <div class="note-toolbar">
+            <button class="btn newnote promo" id="newNoteBtn" title="Efface la saisie et prépare une nouvelle note">NEW</button>
+            <button class="btn voice" id="dictateBtn" title="Dicter la note">🎙</button>
+            <button class="btn analyze" id="analyzeAiBtn" title="Analyse via OpenAI">Analyse IA</button>
           </div>
-          <div class="split" style="margin-top:10px">
-            <button class="btn" id="saveKeyBtn">Sauver la clé</button>
-            <button class="btn" id="refreshCompaniesBtn">Rafraîchir sociétés SharePoint</button>
+          <div class="note-actions">
+            <button class="btn secondary save-wide" id="saveBtn">Enregistrer la note</button>
+            <button class="btn ghost" id="refreshCompaniesBtn">Rafraîchir sociétés SharePoint</button>
           </div>
+          <div class="note-actions">
+            <button class="btn" id="saveKeyBtn">Sauver les paramètres</button>
+          </div>
+          <details class="advanced">
+            <summary>Paramètres avancés</summary>
+            <div class="advanced-grid">
+              <div class="meta">
+                <div class="field">
+                  <label for="openaiKey">Clé OpenAI API</label>
+                  <input id="openaiKey" type="password" placeholder="sk-..." />
+                </div>
+                <div class="field">
+                  <label for="openaiModel">Modèle</label>
+                  <select id="openaiModel">
+                    <option value="gpt-4.1-mini">gpt-4.1-mini</option>
+                    <option value="gpt-5">gpt-5</option>
+                    <option value="o3">o3</option>
+                  </select>
+                </div>
+              </div>
+              <div class="field">
+                <label for="apiBaseUrl">URL du backend IA</label>
+                <input id="apiBaseUrl" placeholder="http://localhost:8787" />
+              </div>
+              <div class="meta">
+                <div class="field">
+                  <label for="newCompany">Ajouter une société</label>
+                  <input id="newCompany" placeholder="Ex. SCI, magasin, holding, logistique..." />
+                </div>
+                <div class="field" style="justify-content:end">
+                  <label style="opacity:0">Action</label>
+                  <button class="btn" id="addCompanyBtn">Ajouter la société</button>
+                </div>
+              </div>
+              <div class="tiny" style="margin:-4px 0 0">La clé est stockée uniquement dans ton navigateur si tu l’enregistres localement.</div>
+            </div>
+          </details>
         </div>
       </section>
 
-      <section class="card">
+      <section class="card tech">
         <div class="card-head">
           <h2>Résultat IA</h2>
           <div class="toplist">
-            <span class="chip" id="themeChip">Thème: -</span>
+            <span class="chip theme-live" id="themeChip">Thème: -</span>
             <span class="chip" id="companyChip">Société: -</span>
           </div>
         </div>
@@ -217,7 +513,7 @@
 
     <div style="height:18px"></div>
 
-    <section class="card">
+      <section class="card tech">
       <div class="card-head">
         <h2>Notes enregistrées</h2>
         <div class="tiny">Filtre par thème ou société directement ci-dessous</div>
@@ -254,6 +550,7 @@
       "Financier",
       "Légal",
       "RH",
+      "Vente",
       "Commercial",
       "Logistique",
       "Achats",
@@ -267,6 +564,7 @@
       { theme: "RH", words: ["salarié", "contrat de travail", "paie", "recrutement", "entretien", "absence", "discipline", "formation", "direction du travail"] },
       { theme: "Logistique", words: ["stock", "transport", "fret", "entrepôt", "livraison", "réception", "expédition", "conteneur", "douane"] },
       { theme: "Commercial", words: ["vente", "client", "magasin", "merch", "promotion", "prix", "réclamation", "assortiment"] },
+      { theme: "Vente", words: ["vendre", "vente", "cession", "prix de vente", "repreneur", "acheteur", "vendre la", "cession de"] },
       { theme: "Admin", words: ["administratif", "dossier", "procédure", "documents", "facture", "email", "courrier", "suivi"] },
       { theme: "IT", words: ["serveur", "base de données", "mysql", "application", "bug", "logiciel", "écran", "connexion", "compte"] },
       { theme: "Immobilier", words: ["local", "bail", "travaux", "chantier", "loyer", "surface", "parking"] },
@@ -279,6 +577,7 @@
       Légal: ["Quel est le risque juridique ?", "Faut-il une validation avocat/juriste ?", "Quel document contractuel doit être relu ?"],
       RH: ["Qui porte le sujet côté RH ?", "Quel calendrier social faut-il anticiper ?", "Y a-t-il un risque disciplinaire ou paie ?"],
       Commercial: ["Quel effet sur le CA ou la marge ?", "Quel magasin ou canal est concerné ?", "Quel client est impacté ?"],
+      Vente: ["Quelle est la société ou l'actif à vendre ?", "Quel prix ou montant cible ?", "Quel calendrier de cession ?"],
       Logistique: ["Quel délai de livraison est attendu ?", "Y a-t-il un point de stock ?", "Quel transporteur ou site est concerné ?"],
       Achats: ["Quel fournisseur est concerné ?", "Faut-il comparer plusieurs devis ?", "Quel est le seuil de validation ?"],
       Immobilier: ["Quel site ou local est concerné ?", "Y a-t-il des travaux ou un bail à renégocier ?", "Quel planning de réalisation ?"],
@@ -385,10 +684,109 @@
       return "Admin";
     }
 
+    function detectCompany(text) {
+      const normalized = text.toLowerCase().replace(/\s+/g, " ");
+      const sorted = [...state.companies].sort((a, b) => b.length - a.length);
+      for (const company of sorted) {
+        const candidate = company.toLowerCase().replace(/\s+/g, " ");
+        if (normalized.includes(candidate)) return company;
+      }
+      return "";
+    }
+
+    function normalizeForMatch(text) {
+      return text
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9]+/g, " ")
+        .trim();
+    }
+
+    function levenshtein(a, b) {
+      if (a === b) return 0;
+      if (!a) return b.length;
+      if (!b) return a.length;
+      const prev = Array.from({ length: b.length + 1 }, (_, i) => i);
+      for (let i = 1; i <= a.length; i++) {
+        let leftTop = i - 1;
+        prev[0] = i;
+        for (let j = 1; j <= b.length; j++) {
+          const saved = prev[j];
+          const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+          prev[j] = Math.min(
+            prev[j] + 1,
+            prev[j - 1] + 1,
+            leftTop + cost
+          );
+          leftTop = saved;
+        }
+      }
+      return prev[b.length];
+    }
+
+    function normalizedSimilarity(a, b) {
+      const dist = levenshtein(a, b);
+      const max = Math.max(a.length, b.length) || 1;
+      return 1 - dist / max;
+    }
+
+    function similarityScore(source, target) {
+      const s = normalizeForMatch(source);
+      const t = normalizeForMatch(target);
+      if (!s || !t) return 0;
+      if (s === t) return 1;
+      if (s.includes(t) || t.includes(s)) return 0.92;
+      const sWords = s.split(/\s+/).filter(Boolean);
+      const tWords = t.split(/\s+/).filter(Boolean);
+      let shared = 0;
+      for (const word of sWords) if (tWords.includes(word)) shared++;
+      const union = new Set([...sWords, ...tWords]).size || 1;
+      const tokenScore = shared / union;
+      const firstWordScore = normalizedSimilarity(sWords[0] || "", tWords[0] || "");
+      const lastWordScore = normalizedSimilarity(sWords[sWords.length - 1] || "", tWords[tWords.length - 1] || "");
+      const partialScore = Math.max(
+        ...tWords.map(word => Math.max(...sWords.map(sw => normalizedSimilarity(sw, word))))
+      );
+      return Math.min(1, tokenScore * 0.5 + firstWordScore * 0.25 + lastWordScore * 0.15 + partialScore * 0.25);
+    }
+
+    function bestCompanyMatch(text) {
+      const textNorm = normalizeForMatch(text);
+      if (!textNorm) return "";
+      let best = "";
+      let bestScore = 0;
+      const textWords = textNorm.split(/\s+/).filter(Boolean);
+      const sciBias = textWords.includes("sci");
+      for (const company of state.companies) {
+        const companyNorm = normalizeForMatch(company);
+        const companyWords = companyNorm.split(/\s+/).filter(Boolean);
+        if (sciBias && !companyWords.includes("sci")) continue;
+        let score = similarityScore(textNorm, company);
+        if (textWords[0] && companyWords[0] && textWords[0] === companyWords[0]) score += 0.12;
+        if (textWords[0] === "sci" && companyWords[0] === "sci") score += 0.12;
+        if (score > bestScore) {
+          bestScore = score;
+          best = company;
+        }
+      }
+      return bestScore >= 0.42 ? best : "";
+    }
+
+    function updateCompanySuggestion() {
+      const text = `${$("title").value} ${$("note").value}`;
+      const match = bestCompanyMatch(text);
+      if (match && match !== $("company").value) {
+        $("company").value = match;
+        $("companyChip").textContent = `Société: ${match}`;
+      }
+    }
+
     function suggestQuestions(theme, text) {
       const base = questionBank[theme] || questionBank.Admin;
       const extra = [];
       const lower = text.toLowerCase();
+      if (lower.includes("vendre") || lower.includes("vente") || lower.includes("cession")) extra.push("Faut-il traiter ce sujet comme une cession ou une vente ?");
       if (lower.includes("assurance")) extra.push("Le contrat ou la franchise a-t-il été vérifié ?");
       if (lower.includes("agence") || lower.includes("magasin")) extra.push("Quel site ou point de vente est concerné ?");
       if (lower.includes("impôt") || lower.includes("taxe")) extra.push("Faut-il valider avec l'expert-comptable ou le juriste fiscal ?");
@@ -404,6 +802,59 @@
     function renderQuestions(theme, text) {
       const questions = suggestQuestions(theme, text);
       $("questions").innerHTML = questions.map(q => `<div class="item">${q}</div>`).join("");
+    }
+
+    function summarizeTitle(text, maxWords = 6) {
+      const words = text
+        .replace(/\s+/g, " ")
+        .trim()
+        .split(" ")
+        .filter(Boolean);
+      return words.slice(0, maxWords).join(" ");
+    }
+
+    function buildAutoTitle(text, theme, company, summary) {
+      const normalized = text.toLowerCase();
+      const matchedCompany = company && company !== "Toutes sociétés" ? company : detectCompany(text);
+      const cleanCompany = matchedCompany ? matchedCompany.replace(/\s+/g, " ").trim() : "";
+      const amountMatch = text.match(/\b\d+(?:[.,]\d+)?\s*(?:m|ms|m€|k|€)?\b/i);
+      const amount = amountMatch ? amountMatch[0].replace(/\s+/g, "") : "";
+
+      if (/(vente|vendre|cession)/i.test(normalized)) {
+        const base = cleanCompany ? `Vente ${cleanCompany}` : "Vente";
+        return amount ? `${base} - ${amount}` : base;
+      }
+
+      if (cleanCompany && theme && theme !== "Auto") {
+        return `${theme} ${cleanCompany}`;
+      }
+
+      if (cleanCompany) {
+        return cleanCompany;
+      }
+
+      if (summary) {
+        return summarizeTitle(summary, 6);
+      }
+
+      return summarizeTitle(text, 6);
+    }
+
+    function showToast(message) {
+      const toast = $("toast");
+      toast.textContent = message;
+      toast.classList.add("show");
+      clearTimeout(showToast._timer);
+      showToast._timer = setTimeout(() => toast.classList.remove("show"), 1600);
+    }
+
+    function updateThemeUI(theme, hint) {
+      $("themeChip").textContent = `Thème: ${theme}`;
+      $("themeBannerValue").textContent = theme || "Auto";
+      $("themeBannerHint").textContent = hint || "";
+      $("themeBanner").classList.remove("flash");
+      void $("themeBanner").offsetWidth;
+      $("themeBanner").classList.add("flash");
     }
 
     async function analyzeWithOpenAI(title, note) {
@@ -482,15 +933,20 @@
       const title = $("title").value.trim();
       const note = $("note").value.trim();
       const company = $("company").value;
-      const manualTheme = $("manualTheme").value;
-      const detectedTheme = detectTheme(`${title} ${note}`);
-      const finalTheme = manualTheme !== "Auto" ? manualTheme : detectedTheme;
+      const text = `${title} ${note}`;
+      const detectedTheme = detectTheme(text);
+      const detectedCompany = bestCompanyMatch(text) || detectCompany(text);
+      const finalTheme = detectedTheme;
       const combined = title ? `${title}\n\n${note}` : note;
+      const finalCompany = detectedCompany || company;
+      const finalTitle = title || buildAutoTitle(text, finalTheme, finalCompany, combined);
 
-      state.current = { title, note: combined, company, theme: finalTheme, createdAt: new Date().toLocaleString("fr-FR") };
+      state.current = { title: finalTitle, note: combined, company: finalCompany, theme: finalTheme, createdAt: new Date().toLocaleString("fr-FR") };
 
-      $("themeChip").textContent = `Thème: ${finalTheme}`;
-      $("companyChip").textContent = `Société: ${company}`;
+      updateThemeUI(finalTheme, "Détection locale");
+      $("companyChip").textContent = `Société: ${finalCompany}`;
+      if (finalTitle) $("title").value = finalTitle;
+      if (finalCompany && finalCompany !== "Toutes sociétés") $("company").value = finalCompany;
       $("summary").textContent = combined || "Aucune note saisie.";
       renderQuestions(finalTheme, combined);
       $("status").textContent = "Note analysée";
@@ -500,18 +956,23 @@
     async function analyzeSmart() {
       const title = $("title").value.trim();
       const note = $("note").value.trim();
-      const manualTheme = $("manualTheme").value;
-      const company = $("company").value;
+      const currentCompany = $("company").value;
+      const text = `${title} ${note}`;
       $("status").textContent = "Analyse IA en cours...";
       try {
         const ai = state.apiBaseUrl ? await analyzeViaBackend(title, note) : await analyzeWithOpenAI(title, note);
-        const finalTheme = manualTheme !== "Auto" ? manualTheme : (ai.theme || detectTheme(`${title} ${note}`));
-        const finalCompany = company !== "Toutes sociétés" ? company : (ai.company_hint || "Toutes sociétés");
+        const localTheme = detectTheme(text);
+        const aiTheme = ai.theme || localTheme;
+        const aiCompany = ai.company_hint || "";
+        const textCompany = bestCompanyMatch(text) || detectCompany(text);
+        const finalTheme = aiTheme || localTheme;
+        const finalCompany = aiCompany || textCompany || currentCompany;
         const summary = ai.summary || (title ? `${title}\n\n${note}` : note);
-        const questions = Array.isArray(ai.questions) && ai.questions.length ? ai.questions : suggestQuestions(finalTheme, `${title} ${note}`);
+        const finalTitle = title || buildAutoTitle(text, finalTheme, finalCompany, summary);
+        const questions = Array.isArray(ai.questions) && ai.questions.length ? ai.questions : suggestQuestions(finalTheme, text);
 
         state.current = {
-          title,
+          title: finalTitle,
           note: title ? `${title}\n\n${note}` : note,
           company: finalCompany,
           theme: finalTheme,
@@ -520,11 +981,14 @@
           aiQuestions: questions
         };
 
-        $("themeChip").textContent = `Thème: ${finalTheme}`;
+        updateThemeUI(finalTheme, ai.summary ? "Résultat IA" : "Détection IA");
         $("companyChip").textContent = `Société: ${finalCompany}`;
+        if (finalTitle) $("title").value = finalTitle;
+        if (finalCompany && finalCompany !== "Toutes sociétés") $("company").value = finalCompany;
         $("summary").textContent = summary;
         $("questions").innerHTML = questions.map(q => `<div class="item">${q}</div>`).join("");
         $("status").textContent = "Analyse IA terminée";
+        showToast("Analyse IA terminée");
         return state.current;
       } catch (error) {
         $("status").textContent = `IA indisponible, mode local utilisé`;
@@ -541,18 +1005,37 @@
       $("status").textContent = "Note enregistrée";
     }
 
+    function clearCurrentDraft() {
+      $("title").value = "";
+      $("note").value = "";
+      $("company").value = "Toutes sociétés";
+      $("summary").textContent = "Aucune note analysée pour le moment.";
+      $("questions").innerHTML = "";
+      updateThemeUI("Auto", "Nouvelle page prête");
+      $("companyChip").textContent = "Société: -";
+      $("status").textContent = "Nouvelle note prête";
+    }
+
+    function newNote() {
+      clearCurrentDraft();
+      showToast("Nouvelle note");
+    }
+
     function renderNotes() {
       const tf = $("filterTheme").value;
       const cf = $("filterCompany").value;
-      const filtered = state.notes.filter(n =>
+      const filtered = state.notes.map((n, index) => ({ n, index })).filter(({ n }) =>
         (tf === "Tous thèmes" || n.theme === tf) &&
         (cf === "Toutes sociétés" || n.company === cf)
       );
-      $("notesList").innerHTML = filtered.length ? filtered.map((n, i) => `
+      $("notesList").innerHTML = filtered.length ? filtered.map(({ n, index }) => `
         <div class="item">
           <div class="item-title">
             <strong>${escapeHtml(n.title || "Note sans titre")}</strong>
-            <span class="tiny">${escapeHtml(n.createdAt)}</span>
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+              <span class="tiny">${escapeHtml(n.createdAt)}</span>
+              <button class="btn icon-danger" data-delete-note="${index}" title="Supprimer cette note">Supprimer</button>
+            </div>
           </div>
           <div class="chips">
             <span class="chip">${escapeHtml(n.company)}</span>
@@ -563,16 +1046,64 @@
       `).join("") : `<div class="item danger">Aucune note ne correspond à ce filtre.</div>`;
     }
 
+    function deleteNote(index) {
+      if (index < 0 || index >= state.notes.length) return;
+      const note = state.notes[index];
+      if (!note) return;
+      state.notes.splice(index, 1);
+      persist();
+      renderNotes();
+      showToast("Note supprimée");
+      $("status").textContent = "Note supprimée";
+    }
+
     function escapeHtml(str) {
       return str.replace(/[&<>"']/g, s => ({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[s]));
     }
 
-    function demoFill() {
-      $("company").value = "SOCADIM";
-      $("manualTheme").value = "Auto";
-      $("title").value = "Réunion sur facture fournisseur et échéance de paiement";
-      $("note").value = "Point sur une facture litigieuse, besoin de vérifier le contrat, la TVA, le délai de paiement et le risque de relance.";
-      analyze();
+    function getSpeechRecognition() {
+      return window.SpeechRecognition || window.webkitSpeechRecognition || null;
+    }
+
+    function startDictation() {
+      const SpeechRecognition = getSpeechRecognition();
+      if (!SpeechRecognition) {
+        showToast("Dictée non supportée par ce navigateur");
+        $("status").textContent = "Dictée indisponible";
+        return;
+      }
+      const recognition = new SpeechRecognition();
+      recognition.lang = "fr-FR";
+      recognition.interimResults = true;
+      recognition.continuous = false;
+      const textarea = $("note");
+      const base = textarea.value.trim();
+      let finalChunk = "";
+      $("status").textContent = "Dictée en cours...";
+      showToast("Dictée en cours");
+      recognition.onresult = (event) => {
+        let transcript = "";
+        for (const result of event.results) {
+          transcript += result[0].transcript;
+        }
+        finalChunk = transcript.trim();
+        const merged = base ? `${base}${base.endsWith(" ") ? "" : " "}${finalChunk}` : finalChunk;
+        textarea.value = merged;
+        const liveTheme = detectTheme(merged);
+        updateThemeUI(liveTheme || "Auto", "Dictée en direct");
+      };
+      recognition.onerror = () => {
+        $("status").textContent = "Dictée interrompue";
+      };
+      recognition.onend = () => {
+        if (finalChunk) {
+          const merged = base ? `${base}${base.endsWith(" ") ? "" : " "}${finalChunk}` : finalChunk;
+          textarea.value = merged;
+        }
+        $("status").textContent = "Dictée terminée";
+        showToast("Dictée terminée");
+      };
+      recognition.start();
     }
 
     function persist() {
@@ -630,6 +1161,11 @@
       fillSelect($("filterTheme"), themes);
     }
 
+    function deleteNoteByTarget(target) {
+      const index = Number(target.getAttribute("data-delete-note"));
+      if (Number.isFinite(index)) deleteNote(index);
+    }
+
     function addCompany() {
       const value = $("newCompany").value.trim();
       if (!value) return;
@@ -654,6 +1190,7 @@
         apiBaseUrl: state.apiBaseUrl
       }));
       $("status").textContent = "Clé OpenAI enregistrée localement";
+      showToast("Paramètres enregistrés");
     }
 
     function exportJson() {
@@ -680,44 +1217,32 @@
     $("openaiModel").value = state.openaiModel;
     $("apiBaseUrl").value = state.apiBaseUrl;
 
-    $("analyzeBtn").addEventListener("click", analyze);
     $("analyzeAiBtn").addEventListener("click", analyzeSmart);
     $("saveBtn").addEventListener("click", saveCurrent);
-    $("demoFill").addEventListener("click", demoFill);
+    $("newNoteBtn").addEventListener("click", newNote);
+    $("dictateBtn").addEventListener("click", startDictation);
     $("addCompanyBtn").addEventListener("click", addCompany);
-    $("exportData").addEventListener("click", exportJson);
     $("saveKeyBtn").addEventListener("click", saveKey);
     $("refreshCompaniesBtn").addEventListener("click", () => {
       refreshCompanySelects();
       persist();
       $("status").textContent = "Sociétés SharePoint rechargées";
     });
-    $("clearAll").addEventListener("click", () => {
-      state.notes = [];
-      state.companies = [...DEFAULT_COMPANIES];
-      localStorage.removeItem(STORAGE_KEY);
-      localStorage.removeItem(SETTINGS_KEY);
-      $("title").value = "";
-      $("note").value = "";
-      $("newCompany").value = "";
-      $("openaiKey").value = "";
-      $("apiBaseUrl").value = "";
-      $("summary").textContent = "Aucune note analysée pour le moment.";
-      $("questions").innerHTML = "";
-      $("themeChip").textContent = "Thème: -";
-      $("companyChip").textContent = "Société: -";
-      refreshCompanySelects();
-      renderNotes();
-      $("status").textContent = "Notes effacées";
+    $("notesList").addEventListener("click", (event) => {
+      const btn = event.target.closest("[data-delete-note]");
+      if (!btn) return;
+      deleteNoteByTarget(btn);
     });
     $("filterTheme").addEventListener("change", renderNotes);
     $("filterCompany").addEventListener("change", renderNotes);
     $("newCompany").addEventListener("keydown", (e) => {
       if (e.key === "Enter") addCompany();
     });
+    $("title").addEventListener("input", updateCompanySuggestion);
+    $("note").addEventListener("input", updateCompanySuggestion);
 
     renderNotes();
-    demoFill();
+    clearCurrentDraft();
   </script>
 </body>
 </html>
