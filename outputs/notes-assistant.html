@@ -316,6 +316,120 @@
       padding:8px 12px;
       font-size:12px;
     }
+    .business-grid{
+      display:grid;
+      grid-template-columns:repeat(5, minmax(120px, 1fr));
+      gap:12px;
+      margin:4px 0 14px;
+    }
+    @media (max-width: 980px){.business-grid{grid-template-columns:1fr 1fr}}
+    @media (max-width: 620px){.business-grid{grid-template-columns:1fr}}
+    .note-meta{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top:10px;
+    }
+    .note-meta .chip[data-risk="Fort"],
+    .note-meta .chip[data-risk="Critique"]{
+      background:linear-gradient(180deg, #ffe9e5, #e8b3aa);
+      color:#7d1f15;
+    }
+    .note-meta .chip[data-status="À traiter"]{
+      background:linear-gradient(180deg, #fff6d8, #e9cf83);
+      color:#644700;
+    }
+    .note-meta .chip[data-status="Terminé"]{
+      background:linear-gradient(180deg, #e6f4e9, #a9d5b3);
+      color:#1d5a2c;
+    }
+    .chip.alert{
+      background:linear-gradient(180deg, #ffd7d0, #d05a49);
+      color:#fff;
+      border-color:#8f2e22;
+      text-shadow:0 1px 0 rgba(0,0,0,.25);
+    }
+    .filter-grid{
+      display:grid;
+      grid-template-columns:1.2fr .8fr .8fr .8fr;
+      gap:14px;
+    }
+    @media (max-width: 900px){.filter-grid{grid-template-columns:1fr 1fr}}
+    @media (max-width: 620px){.filter-grid{grid-template-columns:1fr}}
+    .search-input{
+      border-color:#315f98;
+      background:linear-gradient(180deg, #ffffff, #e8f1fb);
+    }
+    .edit-banner{
+      display:none;
+      margin:0 0 14px;
+      padding:10px 12px;
+      border:1px solid #7f7f7f;
+      background:linear-gradient(180deg, #fff6c7, #e3c76a);
+      font-weight:800;
+    }
+    .edit-banner.active{display:block}
+    .form-zone{
+      border:1px solid #9a9a9a;
+      border-top-color:#ffffff;
+      border-left-color:#ffffff;
+      border-right-color:#6d6d6d;
+      border-bottom-color:#6d6d6d;
+      padding:14px;
+      margin-bottom:14px;
+      background:linear-gradient(180deg, #f8f8f8, #e7e7e7);
+      box-shadow:inset 1px 1px 0 rgba(255,255,255,.88);
+    }
+    .form-zone-title{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      align-items:center;
+      margin:-4px 0 12px;
+      padding-bottom:8px;
+      border-bottom:1px solid #b7b7b7;
+      font-weight:900;
+      color:#1d3550;
+      text-transform:uppercase;
+      letter-spacing:.06em;
+      font-size:12px;
+    }
+    .form-zone-title span:last-child{
+      color:#6d6d6d;
+      text-transform:none;
+      letter-spacing:0;
+      font-weight:700;
+    }
+    .alert-board{
+      margin-bottom:18px;
+    }
+    .alert-summary{
+      display:grid;
+      grid-template-columns:repeat(4, minmax(120px, 1fr));
+      gap:10px;
+      margin-bottom:14px;
+    }
+    @media (max-width: 760px){.alert-summary{grid-template-columns:1fr 1fr}}
+    @media (max-width: 520px){.alert-summary{grid-template-columns:1fr}}
+    .alert-kpi{
+      border:1px solid #7f7f7f;
+      background:linear-gradient(180deg, #fff, #dedede);
+      padding:10px 12px;
+      box-shadow:inset 1px 1px 0 rgba(255,255,255,.95);
+    }
+    .alert-kpi strong{
+      display:block;
+      font-size:24px;
+      line-height:1;
+      color:#1d3550;
+    }
+    .alert-list{
+      display:grid;
+      gap:10px;
+    }
+    .alert-list .item{
+      border-left:6px solid #d05a49;
+    }
     .btn.icon-danger{
       background:linear-gradient(180deg, #f6f6f6, #d3d3d3);
       color:#8e2d21;
@@ -403,6 +517,21 @@
       <div class="toolbar"></div>
     </header>
 
+    <section class="card tech alert-board">
+      <div class="card-head">
+        <h2>Alertes</h2>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn" id="monthlyMailBtn">Mail mensuel notes ouvertes</button>
+          <button class="btn ghost" id="backendAlertsBtn">Relances backend J-10</button>
+          <button class="btn ghost" id="enableAlertsTopBtn">Activer notifications</button>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="alert-summary" id="alertSummary"></div>
+        <div class="alert-list" id="alertList"></div>
+      </div>
+    </section>
+
     <div class="board">
       <section class="card tech">
           <div class="card-head">
@@ -410,6 +539,7 @@
           <div class="tiny" id="status">Analyse prête</div>
         </div>
         <div class="card-body">
+          <div class="edit-banner" id="editBanner">Mode édition actif</div>
           <div class="theme-banner" id="themeBanner">
             <div>
               <div class="label">Thème détecté</div>
@@ -417,23 +547,67 @@
             </div>
             <div class="tiny" id="themeBannerHint">L’analyse n’a pas encore été lancée.</div>
           </div>
-          <div class="meta">
+          <div class="form-zone">
+            <div class="form-zone-title">
+              <span>Identification</span>
+              <span>société, titre, note</span>
+            </div>
+            <div class="meta">
+              <div class="field">
+                <label for="company">Société</label>
+                <select id="company"></select>
+              </div>
+              <div class="field manual-theme-wrap hidden">
+                <label for="manualTheme">Thème manuel</label>
+                <select id="manualTheme"></select>
+              </div>
+            </div>
             <div class="field">
-              <label for="company">Société</label>
-              <select id="company"></select>
+              <label for="title">Titre</label>
+              <input id="title" placeholder="Ex. réunion assurance, litige fournisseur, point trésorerie..." />
             </div>
-            <div class="field manual-theme-wrap hidden">
-              <label for="manualTheme">Thème manuel</label>
-              <select id="manualTheme"></select>
+            <div class="field">
+              <label for="note">Note</label>
+              <textarea id="note" placeholder="Écris ici ta note de réunion, ton idée ou ton sujet..."></textarea>
             </div>
           </div>
-          <div class="field">
-            <label for="title">Titre</label>
-            <input id="title" placeholder="Ex. réunion assurance, litige fournisseur, point trésorerie..." />
-          </div>
-          <div class="field">
-            <label for="note">Note</label>
-            <textarea id="note" placeholder="Écris ici ta note de réunion, ton idée ou ton sujet..."></textarea>
+
+          <div class="form-zone">
+            <div class="form-zone-title">
+              <span>Suivi</span>
+              <span>échéance, risque, responsable</span>
+            </div>
+            <div class="business-grid">
+              <div class="field">
+                <label for="statusField">Statut</label>
+                <select id="statusField">
+                  <option>À traiter</option>
+                  <option>En attente</option>
+                  <option>Terminé</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="riskField">Risque</label>
+                <select id="riskField">
+                  <option>Normal</option>
+                  <option>À surveiller</option>
+                  <option>Fort</option>
+                  <option>Critique</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="dueDateField">Échéance</label>
+                <input id="dueDateField" type="date" />
+              </div>
+              <div class="field">
+                <label for="ownerField">Responsable</label>
+                <input id="ownerField" placeholder="Ex. moi, compta, RH, avocat..." />
+              </div>
+              <div class="field">
+                <label for="amountField">Montant</label>
+                <input id="amountField" placeholder="Ex. 2 500 000 XPF" />
+              </div>
+            </div>
           </div>
           <div class="note-toolbar">
             <button class="btn newnote promo" id="newNoteBtn" title="Efface la saisie et prépare une nouvelle note">NEW</button>
@@ -443,6 +617,7 @@
           <div class="note-actions">
             <button class="btn secondary save-wide" id="saveBtn">Enregistrer la note</button>
             <button class="btn ghost" id="refreshCompaniesBtn">Rafraîchir sociétés SharePoint</button>
+            <button class="btn ghost" id="enableAlertsBtn">Activer notifications échéances</button>
           </div>
           <div class="note-actions">
             <button class="btn" id="saveKeyBtn">Sauver les paramètres</button>
@@ -467,6 +642,13 @@
               <div class="field">
                 <label for="apiBaseUrl">URL du backend IA</label>
                 <input id="apiBaseUrl" placeholder="http://localhost:8787" />
+              </div>
+              <div class="field">
+                <label for="mailBackendUrl">URL backend mails</label>
+                <input id="mailBackendUrl" placeholder="http://127.0.0.1:8798" />
+              </div>
+              <div class="note-actions">
+                <button class="btn" id="backendStatusBtn">Tester backend mails</button>
               </div>
               <div class="meta">
                 <div class="field">
@@ -519,7 +701,11 @@
         <div class="tiny">Filtre par thème ou société directement ci-dessous</div>
       </div>
       <div class="card-body">
-        <div class="meta">
+        <div class="filter-grid">
+          <div class="field">
+            <label for="searchNotes">Rechercher</label>
+            <input class="search-input" id="searchNotes" placeholder="Titre, société, texte, responsable, montant..." />
+          </div>
           <div class="field">
             <label for="filterTheme">Filtrer par thème</label>
             <select id="filterTheme"></select>
@@ -527,6 +713,15 @@
           <div class="field">
             <label for="filterCompany">Filtrer par société</label>
             <select id="filterCompany"></select>
+          </div>
+          <div class="field">
+            <label for="filterStatus">Filtrer par statut</label>
+            <select id="filterStatus">
+              <option>Tous statuts</option>
+              <option>À traiter</option>
+              <option>En attente</option>
+              <option>Terminé</option>
+            </select>
           </div>
         </div>
         <div class="notes" id="notesList"></div>
@@ -572,17 +767,66 @@
     ];
 
     const questionBank = {
-      Admin: ["Quel est le responsable du suivi ?", "Quelle est la prochaine échéance ?", "Quels documents faut-il archiver ?"],
-      Financier: ["Quel impact sur la trésorerie ?", "Y a-t-il une provision à prévoir ?", "Quel est le budget ou le montant en jeu ?"],
-      Légal: ["Quel est le risque juridique ?", "Faut-il une validation avocat/juriste ?", "Quel document contractuel doit être relu ?"],
-      RH: ["Qui porte le sujet côté RH ?", "Quel calendrier social faut-il anticiper ?", "Y a-t-il un risque disciplinaire ou paie ?"],
-      Commercial: ["Quel effet sur le CA ou la marge ?", "Quel magasin ou canal est concerné ?", "Quel client est impacté ?"],
-      Vente: ["Quelle est la société ou l'actif à vendre ?", "Quel prix ou montant cible ?", "Quel calendrier de cession ?"],
-      Logistique: ["Quel délai de livraison est attendu ?", "Y a-t-il un point de stock ?", "Quel transporteur ou site est concerné ?"],
-      Achats: ["Quel fournisseur est concerné ?", "Faut-il comparer plusieurs devis ?", "Quel est le seuil de validation ?"],
-      Immobilier: ["Quel site ou local est concerné ?", "Y a-t-il des travaux ou un bail à renégocier ?", "Quel planning de réalisation ?"],
-      IT: ["Quel système est impacté ?", "Y a-t-il une sauvegarde ou un plan de secours ?", "Qui doit intervenir techniquement ?"],
-      Admin: ["Quel document manque-t-il ?", "Qui doit relancer ?", "Quelle preuve de traitement faut-il garder ?"]
+      Admin: [
+        "Qui est responsable du prochain mouvement et pour quelle date ?",
+        "Quelle preuve faut-il conserver pour éviter une contestation plus tard ?",
+        "Quelle relance concrète doit partir si personne ne répond sous 7 jours ?",
+        "Quel document manque pour clôturer proprement le sujet ?"
+      ],
+      Financier: [
+        "Quel montant est en jeu en XPF et quel impact trésorerie faut-il anticiper ?",
+        "Faut-il comptabiliser, provisionner ou bloquer un paiement dès maintenant ?",
+        "Qui valide le traitement: compta, contrôle de gestion, expert-comptable ou associé ?",
+        "Quelle échéance de paiement, déclaration ou reporting peut créer un risque ?"
+      ],
+      Légal: [
+        "Quel risque juridique concret faut-il éviter: délai, clause, preuve, responsabilité ou autorisation ?",
+        "Faut-il saisir avocat, juriste ou notaire avant toute réponse écrite ?",
+        "Quelle pièce contractuelle doit être relue avant décision ?",
+        "Quelle position de négociation protège le mieux le groupe ?"
+      ],
+      RH: [
+        "Quel risque social ou paie existe si le sujet traîne ?",
+        "Qui doit valider: RH, direction, avocat social ou direction du travail ?",
+        "Quelle trace écrite faut-il garder dans le dossier salarié ?",
+        "Quelle date limite faut-il respecter pour éviter une irrégularité ?"
+      ],
+      Commercial: [
+        "Quel effet attendu sur chiffre d'affaires, marge ou fréquentation magasin ?",
+        "Quel magasin, canal ou responsable opérationnel doit agir en premier ?",
+        "Quelle décision prix, stock ou communication faut-il prendre ?",
+        "Quel indicateur permettra de vérifier si l'action marche ?"
+      ],
+      Vente: [
+        "Quel actif ou quelle société est réellement concerné par la cession ?",
+        "Quel prix cible, prix plancher et calendrier de décision faut-il poser ?",
+        "Quelles conditions suspensives ou validations associés sont nécessaires ?",
+        "Quel document faut-il préparer: teaser, NDA, dossier financier, promesse ou PV ?"
+      ],
+      Logistique: [
+        "Quel site, conteneur, transporteur ou fournisseur bloque réellement le flux ?",
+        "Quel coût additionnel ou risque rupture faut-il chiffrer ?",
+        "Qui doit relancer et avec quelle date limite de réponse ?",
+        "Quelle solution de secours faut-il prévoir si le délai n'est pas tenu ?"
+      ],
+      Achats: [
+        "Quel fournisseur est concerné et quelle alternative crédible existe ?",
+        "Quel seuil de validation ou engagement financier est déclenché ?",
+        "Faut-il challenger le devis, demander une remise ou comparer trois offres ?",
+        "Quelle échéance de commande conditionne la disponibilité en magasin ?"
+      ],
+      Immobilier: [
+        "Quel site, bail, autorisation ou chantier est concerné précisément ?",
+        "Quel risque délai, loyer, travaux, assurance ou administratif faut-il suivre ?",
+        "Qui doit valider: bailleur, notaire, architecte, mairie ou associé ?",
+        "Quelle date limite doit déclencher une relance automatique ?"
+      ],
+      IT: [
+        "Quel système critique est impacté et quel plan de continuité existe ?",
+        "Qui intervient techniquement et sous quel délai maximal ?",
+        "Existe-t-il une sauvegarde récente ou un retour arrière possible ?",
+        "Quel impact opérationnel pour les magasins, la compta ou les bases MySQL ?"
+      ]
     };
 
     const state = {
@@ -664,12 +908,15 @@
       ],
       openaiKey: "",
       openaiModel: "gpt-4.1-mini",
-      apiBaseUrl: ""
+      apiBaseUrl: "",
+      mailBackendUrl: "http://127.0.0.1:8798",
+      editingIndex: null
     };
 
     const $ = (id) => document.getElementById(id);
     const STORAGE_KEY = "notes-assistant-v1";
     const SETTINGS_KEY = "notes-assistant-settings-v1";
+    const ALERT_KEY = "notes-assistant-alerts-v1";
     const DEFAULT_COMPANIES = [...state.companies];
 
     function fillSelect(select, items) {
@@ -684,16 +931,6 @@
       return "Admin";
     }
 
-    function detectCompany(text) {
-      const normalized = text.toLowerCase().replace(/\s+/g, " ");
-      const sorted = [...state.companies].sort((a, b) => b.length - a.length);
-      for (const company of sorted) {
-        const candidate = company.toLowerCase().replace(/\s+/g, " ");
-        if (normalized.includes(candidate)) return company;
-      }
-      return "";
-    }
-
     function normalizeForMatch(text) {
       return text
         .toLowerCase()
@@ -701,6 +938,45 @@
         .replace(/[\u0300-\u036f]/g, "")
         .replace(/[^a-z0-9]+/g, " ")
         .trim();
+    }
+
+    function meaningfulWords(text) {
+      const weak = new Set(["la", "le", "les", "de", "du", "des", "d", "et", "a", "au", "aux", "societe", "sarl", "sas", "sa"]);
+      return normalizeForMatch(text).split(/\s+/).filter(word => word && !weak.has(word));
+    }
+
+    function companyVariants(company) {
+      const variants = new Set([company]);
+      const parenthesis = company.match(/\(([^)]+)\)/);
+      const beforeParenthesis = company.replace(/\s*\([^)]*\)\s*/g, " ").trim();
+      if (parenthesis?.[1]) variants.add(parenthesis[1]);
+      if (beforeParenthesis && beforeParenthesis !== company) variants.add(beforeParenthesis);
+      const withoutLegal = beforeParenthesis.replace(/^(SCI|SC|SARL|SAS|SA)\s+/i, "").trim();
+      if (withoutLegal && withoutLegal !== beforeParenthesis) variants.add(withoutLegal);
+      const words = meaningfulWords(beforeParenthesis);
+      if (words.length >= 2) variants.add(words.join(" "));
+      if (words.length >= 2) variants.add(words.slice(-2).join(" "));
+      const acronym = words.map(word => word[0]).join("");
+      const ambiguousAcronyms = new Set(["sci", "sc", "sas", "sarl", "sa"]);
+      if (acronym.length >= 3 && !ambiguousAcronyms.has(acronym)) variants.add(acronym);
+      return [...new Set([...variants].map(normalizeForMatch))].filter(v => v.length >= 2);
+    }
+
+    function exactCompanyHit(text) {
+      const normalized = ` ${normalizeForMatch(text)} `;
+      const sorted = [...state.companies]
+        .filter(company => company !== "Toutes sociétés")
+        .sort((a, b) => b.length - a.length);
+      for (const company of sorted) {
+        for (const variant of companyVariants(company)) {
+          if (variant.length >= 3 && normalized.includes(` ${variant} `)) return company;
+        }
+      }
+      return "";
+    }
+
+    function detectCompany(text) {
+      return exactCompanyHit(text);
     }
 
     function levenshtein(a, b) {
@@ -751,57 +1027,140 @@
       return Math.min(1, tokenScore * 0.5 + firstWordScore * 0.25 + lastWordScore * 0.15 + partialScore * 0.25);
     }
 
+    function textWindows(words, maxSize = 4) {
+      const windows = [];
+      for (let size = 1; size <= Math.min(maxSize, words.length); size++) {
+        for (let start = 0; start <= words.length - size; start++) {
+          windows.push(words.slice(start, start + size).join(" "));
+        }
+      }
+      return windows;
+    }
+
+    function scoreCompanyWindow(windowText, variant) {
+      const windowWords = windowText.split(/\s+/).filter(Boolean);
+      const variantWords = variant.split(/\s+/).filter(Boolean);
+      if (windowWords.length === 1 && variantWords.length > 1) return 0;
+      if (windowWords[0] === "sci" && variantWords[0] === "sci" && windowWords.length === 1) return 0;
+      return similarityScore(windowText, variant);
+    }
+
+    function resolveCompanyFromInputs(title, note, fallback = "") {
+      const noteMatch = bestCompanyMatch(note) || detectCompany(note);
+      if (noteMatch) return noteMatch;
+      const titleMatch = bestCompanyMatch(title) || detectCompany(title);
+      if (titleMatch) return titleMatch;
+      return fallback && fallback !== "Toutes sociétés" ? fallback : "";
+    }
+
     function bestCompanyMatch(text) {
+      const exact = exactCompanyHit(text);
+      if (exact) return exact;
       const textNorm = normalizeForMatch(text);
       if (!textNorm) return "";
       let best = "";
       let bestScore = 0;
       const textWords = textNorm.split(/\s+/).filter(Boolean);
+      const windows = textWindows(textWords, 4);
       const sciBias = textWords.includes("sci");
       for (const company of state.companies) {
+        if (company === "Toutes sociétés") continue;
         const companyNorm = normalizeForMatch(company);
         const companyWords = companyNorm.split(/\s+/).filter(Boolean);
         if (sciBias && !companyWords.includes("sci")) continue;
-        let score = similarityScore(textNorm, company);
-        if (textWords[0] && companyWords[0] && textWords[0] === companyWords[0]) score += 0.12;
-        if (textWords[0] === "sci" && companyWords[0] === "sci") score += 0.12;
+        const variants = companyVariants(company);
+        let score = Math.max(
+          similarityScore(textNorm, company),
+          ...variants.map(variant => Math.max(...windows.map(windowText => scoreCompanyWindow(windowText, variant))))
+        );
+        const companyKeyWords = meaningfulWords(company);
+        const sharedKeyWords = companyKeyWords.filter(word => textWords.includes(word)).length;
+        if (sharedKeyWords >= 2) score += 0.18;
+        if (sciBias && companyWords[0] === "sci" && sharedKeyWords >= 1) score += 0.16;
+        if (textWords[0] && companyWords[0] && textWords[0] === companyWords[0]) score += 0.08;
         if (score > bestScore) {
           bestScore = score;
           best = company;
         }
       }
-      return bestScore >= 0.42 ? best : "";
+      return bestScore >= 0.58 ? best : "";
     }
 
     function updateCompanySuggestion() {
-      const text = `${$("title").value} ${$("note").value}`;
-      const match = bestCompanyMatch(text);
+      const match = resolveCompanyFromInputs($("title").value, $("note").value, $("company").value);
       if (match && match !== $("company").value) {
         $("company").value = match;
         $("companyChip").textContent = `Société: ${match}`;
       }
     }
 
+    function formatFullNumber(value) {
+      return Math.round(value).toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+    }
+
+    function parseAmountCandidate(rawNumber, rawUnit = "") {
+      const numeric = Number(String(rawNumber).replace(/\s+/g, "").replace(",", "."));
+      if (!Number.isFinite(numeric)) return null;
+      const unit = normalizeForMatch(rawUnit);
+      let multiplier = 1;
+      if (unit === "m" || unit === "ms" || unit === "meur" || unit === "me") multiplier = 1000000;
+      if (unit === "k") multiplier = 1000;
+      return numeric * multiplier;
+    }
+
+    function extractAmount(text) {
+      const candidates = [];
+      const compactText = text.replace(/\u00a0/g, " ");
+      const amountPattern = /\b(\d+(?:[\s.,]\d{3})*(?:[,.]\d+)?)\s*(ms|m€|meur|m|k|xpf|f|€|eur)?\b/gi;
+      for (const match of compactText.matchAll(amountPattern)) {
+        const value = parseAmountCandidate(match[1], match[2] || "");
+        if (!value) continue;
+        const hasUnit = Boolean(match[2]);
+        if (hasUnit || value >= 1000) candidates.push(value);
+      }
+      if (!candidates.length) return "";
+      return formatFullNumber(Math.max(...candidates));
+    }
+
+    function updateAmountSuggestion() {
+      const text = `${$("title").value} ${$("note").value}`;
+      const amount = extractAmount(text);
+      if (!amount) return;
+      const field = $("amountField");
+      if (!field.value.trim() || field.dataset.autoAmount === field.value.trim()) {
+        field.value = amount;
+        field.dataset.autoAmount = amount;
+      }
+    }
+
     function suggestQuestions(theme, text) {
       const base = questionBank[theme] || questionBank.Admin;
-      const extra = [];
+      const extra = [
+        "Quelle est la prochaine action concrète, par qui, et avant quelle date ?",
+        "Quel risque pour le groupe si rien n'est fait sous 10 jours ?"
+      ];
       const lower = text.toLowerCase();
-      if (lower.includes("vendre") || lower.includes("vente") || lower.includes("cession")) extra.push("Faut-il traiter ce sujet comme une cession ou une vente ?");
-      if (lower.includes("assurance")) extra.push("Le contrat ou la franchise a-t-il été vérifié ?");
-      if (lower.includes("agence") || lower.includes("magasin")) extra.push("Quel site ou point de vente est concerné ?");
-      if (lower.includes("impôt") || lower.includes("taxe")) extra.push("Faut-il valider avec l'expert-comptable ou le juriste fiscal ?");
-      if (lower.includes("contrat")) extra.push("Quelle clause ou annexe faut-il vérifier ?");
-      if (lower.includes("facture") || lower.includes("paiement")) extra.push("La TVA ou l'échéance de paiement pose-t-elle un sujet ?");
-      if (lower.includes("client")) extra.push("Y a-t-il un risque de réclamation ou d'impayé ?");
-      if (lower.includes("fournisseur")) extra.push("Le fournisseur doit-il être relancé ou challengé ?");
-      if (lower.includes("bail")) extra.push("Le bail impose-t-il un préavis ou une formalité ?");
-      if (lower.includes("rh")) extra.push("Faut-il une validation hiérarchique ou sociale ?");
-      return [...new Set([...extra, ...base])].slice(0, 5);
+      const amount = text.match(/\b\d[\d\s.,]*(?:xpf|f|€|eur|m|k)?\b/i)?.[0]?.trim();
+      const company = bestCompanyMatch(text) || detectCompany(text);
+      if (company) extra.push(`La société ${company} est-elle bien la seule entité concernée ?`);
+      if (amount) extra.push(`Le montant ${amount} est-il validé, provisionné ou à sécuriser ?`);
+      if (lower.includes("vendre") || lower.includes("vente") || lower.includes("cession")) extra.push("Quelle validation associés et quel calendrier de cession faut-il verrouiller ?");
+      if (lower.includes("assurance")) extra.push("Quelle garantie, franchise, exclusion ou déclaration assureur doit être vérifiée ?");
+      if (lower.includes("agence") || lower.includes("magasin")) extra.push("Quel site est impacté et quel responsable terrain doit confirmer ?");
+      if (lower.includes("impôt") || lower.includes("taxe") || lower.includes("fiscal")) extra.push("Faut-il arbitrer avec l'expert-comptable ou le juriste fiscal avant d'agir ?");
+      if (lower.includes("contrat")) extra.push("Quelle clause, annexe, durée ou condition de sortie peut bloquer le dossier ?");
+      if (lower.includes("facture") || lower.includes("paiement")) extra.push("Faut-il payer, bloquer, relancer ou comptabiliser cette facture maintenant ?");
+      if (lower.includes("client")) extra.push("Quel risque d'impayé, réclamation ou litige client faut-il isoler ?");
+      if (lower.includes("fournisseur")) extra.push("Quel engagement fournisseur faut-il confirmer par écrit ?");
+      if (lower.includes("bail")) extra.push("Le bail impose-t-il un préavis, une autorisation bailleur ou une formalité particulière ?");
+      if (lower.includes("rh") || lower.includes("salari")) extra.push("Quelle trace RH faut-il garder avant toute décision ?");
+      if (lower.includes("banque") || lower.includes("financement")) extra.push("Quel impact bancaire ou covenant faut-il vérifier ?");
+      return [...new Set([...extra, ...base])].slice(0, 6);
     }
 
     function renderQuestions(theme, text) {
       const questions = suggestQuestions(theme, text);
-      $("questions").innerHTML = questions.map(q => `<div class="item">${q}</div>`).join("");
+      $("questions").innerHTML = questions.map(q => `<div class="item">${escapeHtml(q)}</div>`).join("");
     }
 
     function summarizeTitle(text, maxWords = 6) {
@@ -815,10 +1174,9 @@
 
     function buildAutoTitle(text, theme, company, summary) {
       const normalized = text.toLowerCase();
-      const matchedCompany = company && company !== "Toutes sociétés" ? company : detectCompany(text);
+      const matchedCompany = company && company !== "Toutes sociétés" ? company : bestCompanyMatch(text) || detectCompany(text);
       const cleanCompany = matchedCompany ? matchedCompany.replace(/\s+/g, " ").trim() : "";
-      const amountMatch = text.match(/\b\d+(?:[.,]\d+)?\s*(?:m|ms|m€|k|€)?\b/i);
-      const amount = amountMatch ? amountMatch[0].replace(/\s+/g, "") : "";
+      const amount = extractAmount(text);
 
       if (/(vente|vendre|cession)/i.test(normalized)) {
         const base = cleanCompany ? `Vente ${cleanCompany}` : "Vente";
@@ -857,15 +1215,43 @@
       $("themeBanner").classList.add("flash");
     }
 
+    function toDateInputValue(date) {
+      const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+      return local.toISOString().slice(0, 10);
+    }
+
+    function datePlusDays(days) {
+      const date = new Date();
+      date.setDate(date.getDate() + days);
+      return toDateInputValue(date);
+    }
+
+    function daysUntil(dateValue) {
+      if (!dateValue) return null;
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const due = new Date(`${dateValue}T00:00:00`);
+      if (Number.isNaN(due.getTime())) return null;
+      return Math.ceil((due - today) / 86400000);
+    }
+
+    function isAlertDue(note) {
+      const days = daysUntil(note.dueDate);
+      return note.status !== "Terminé" && days !== null && days <= 10;
+    }
+
     async function analyzeWithOpenAI(title, note) {
       if (!state.openaiKey) throw new Error("Clé OpenAI manquante");
+      const companyList = state.companies.filter(company => company !== "Toutes sociétés").join(", ");
       const prompt = [
-        "Tu es un assistant de prise de notes pour un DAF. Retourne STRICTEMENT du JSON valide, sans markdown.",
+        "Tu es Nona, assistant de prise de notes pour un DAF d'un groupe commercial en Nouvelle-Calédonie et Polynésie française. Retourne STRICTEMENT du JSON valide, sans markdown.",
         "Schéma attendu: {\"theme\":\"...\",\"company_hint\":\"...\",\"summary\":\"...\",\"questions\":[\"...\",\"...\"]}",
         "Règles: theme doit être un seul mot parmi Admin, Financier, Légal, RH, Commercial, Logistique, Achats, Immobilier, IT, Stratégique, Autre.",
-        "company_hint doit être un nom de société si identifiable sinon chaîne vide.",
-        "summary doit être une synthèse courte et opérationnelle.",
-        "questions doit contenir 3 à 5 questions utiles, orientées risques, délais, validation, finance, juridique ou admin.",
+        "company_hint doit reprendre exactement une société de la liste connue si la note permet de l'identifier, y compris via acronyme, alias, faute mineure ou nom partiel. Sinon chaîne vide.",
+        "summary doit être une synthèse courte et opérationnelle: sujet, risque, décision attendue, prochaine action.",
+        "questions doit contenir 4 à 6 questions vraiment utiles pour un DAF. Chaque question doit aider à décider ou relancer: responsable, date limite, montant, risque, validation, document, arbitrage associés, mail à envoyer.",
+        "Évite les questions génériques. Préfère des questions fermées ou orientées action, par exemple: qui valide, quel montant, quelle pièce, quelle date, quel risque si on attend.",
+        `Sociétés connues: ${companyList}`,
         "",
         `Titre: ${title || "(sans titre)"}`,
         `Note: ${note || "(vide)"}`
@@ -881,7 +1267,7 @@
           model: state.openaiModel,
           input: prompt,
           temperature: 0.2,
-          max_output_tokens: 500
+          max_output_tokens: 700
         })
       });
 
@@ -929,19 +1315,74 @@
       return JSON.parse(cleaned);
     }
 
+    function getBusinessFields() {
+      return {
+        status: $("statusField").value || "À traiter",
+        risk: $("riskField").value || "Normal",
+        dueDate: $("dueDateField").value || datePlusDays(30),
+        owner: $("ownerField").value.trim(),
+        amount: $("amountField").value.trim() || extractAmount(`${$("title").value} ${$("note").value}`)
+      };
+    }
+
+    function withNoteDefaults(note) {
+      return {
+        ...note,
+        status: note.status || "À traiter",
+        risk: note.risk || "Normal",
+        dueDate: note.dueDate || datePlusDays(30),
+        owner: note.owner || "",
+        amount: note.amount || "",
+        updatedAt: note.updatedAt || ""
+      };
+    }
+
+    function noteSearchText(note) {
+      return [
+        note.title,
+        note.note,
+        note.company,
+        note.theme,
+        note.status,
+        note.risk,
+        note.owner,
+        note.amount,
+        note.dueDate,
+        note.aiSummary,
+        ...(note.aiQuestions || [])
+      ].filter(Boolean).join(" ");
+    }
+
+    function editableNoteText(note) {
+      const title = (note.title || "").trim();
+      const text = (note.note || "").trim();
+      if (title && text.startsWith(`${title}\n\n`)) return text.slice(title.length + 2).trim();
+      return text;
+    }
+
     function analyze() {
       const title = $("title").value.trim();
       const note = $("note").value.trim();
       const company = $("company").value;
       const text = `${title} ${note}`;
       const detectedTheme = detectTheme(text);
-      const detectedCompany = bestCompanyMatch(text) || detectCompany(text);
+      const detectedCompany = resolveCompanyFromInputs(title, note, company);
       const finalTheme = detectedTheme;
       const combined = title ? `${title}\n\n${note}` : note;
       const finalCompany = detectedCompany || company;
       const finalTitle = title || buildAutoTitle(text, finalTheme, finalCompany, combined);
+      const existing = Number.isInteger(state.editingIndex) ? state.notes[state.editingIndex] : null;
 
-      state.current = { title: finalTitle, note: combined, company: finalCompany, theme: finalTheme, createdAt: new Date().toLocaleString("fr-FR") };
+      state.current = {
+        id: existing?.id || crypto.randomUUID?.() || String(Date.now()),
+        title: finalTitle,
+        note: combined,
+        company: finalCompany,
+        theme: finalTheme,
+        createdAt: existing?.createdAt || new Date().toLocaleString("fr-FR"),
+        updatedAt: existing ? new Date().toLocaleString("fr-FR") : "",
+        ...getBusinessFields()
+      };
 
       updateThemeUI(finalTheme, "Détection locale");
       $("companyChip").textContent = `Société: ${finalCompany}`;
@@ -964,21 +1405,26 @@
         const localTheme = detectTheme(text);
         const aiTheme = ai.theme || localTheme;
         const aiCompany = ai.company_hint || "";
-        const textCompany = bestCompanyMatch(text) || detectCompany(text);
+        const textCompany = resolveCompanyFromInputs(title, note, currentCompany);
+        const normalizedAiCompany = aiCompany ? (bestCompanyMatch(aiCompany) || detectCompany(aiCompany) || aiCompany) : "";
         const finalTheme = aiTheme || localTheme;
-        const finalCompany = aiCompany || textCompany || currentCompany;
+        const finalCompany = normalizedAiCompany || textCompany || currentCompany;
         const summary = ai.summary || (title ? `${title}\n\n${note}` : note);
         const finalTitle = title || buildAutoTitle(text, finalTheme, finalCompany, summary);
         const questions = Array.isArray(ai.questions) && ai.questions.length ? ai.questions : suggestQuestions(finalTheme, text);
+        const existing = Number.isInteger(state.editingIndex) ? state.notes[state.editingIndex] : null;
 
         state.current = {
+          id: existing?.id || crypto.randomUUID?.() || String(Date.now()),
           title: finalTitle,
           note: title ? `${title}\n\n${note}` : note,
           company: finalCompany,
           theme: finalTheme,
-          createdAt: new Date().toLocaleString("fr-FR"),
+          createdAt: existing?.createdAt || new Date().toLocaleString("fr-FR"),
+          updatedAt: existing ? new Date().toLocaleString("fr-FR") : "",
           aiSummary: summary,
-          aiQuestions: questions
+          aiQuestions: questions,
+          ...getBusinessFields()
         };
 
         updateThemeUI(finalTheme, ai.summary ? "Résultat IA" : "Détection IA");
@@ -986,7 +1432,7 @@
         if (finalTitle) $("title").value = finalTitle;
         if (finalCompany && finalCompany !== "Toutes sociétés") $("company").value = finalCompany;
         $("summary").textContent = summary;
-        $("questions").innerHTML = questions.map(q => `<div class="item">${q}</div>`).join("");
+        $("questions").innerHTML = questions.map(q => `<div class="item">${escapeHtml(q)}</div>`).join("");
         $("status").textContent = "Analyse IA terminée";
         showToast("Analyse IA terminée");
         return state.current;
@@ -999,21 +1445,39 @@
     function saveCurrent() {
       const note = analyze();
       if (!note.note.trim()) return;
-      state.notes.unshift(note);
+      if (Number.isInteger(state.editingIndex)) {
+        state.notes[state.editingIndex] = note;
+      } else {
+        state.notes.unshift(note);
+      }
       persist();
       renderNotes();
-      $("status").textContent = "Note enregistrée";
+      renderAlertView();
+      $("status").textContent = Number.isInteger(state.editingIndex) ? "Note modifiée" : "Note enregistrée";
+      notifyUpcomingDeadlines();
+      state.editingIndex = null;
+      $("editBanner").classList.remove("active");
+      $("saveBtn").textContent = "Enregistrer la note";
     }
 
     function clearCurrentDraft() {
+      state.editingIndex = null;
       $("title").value = "";
       $("note").value = "";
       $("company").value = "Toutes sociétés";
+      $("statusField").value = "À traiter";
+      $("riskField").value = "Normal";
+      $("dueDateField").value = datePlusDays(30);
+      $("ownerField").value = "";
+      $("amountField").value = "";
+      $("amountField").dataset.autoAmount = "";
       $("summary").textContent = "Aucune note analysée pour le moment.";
       $("questions").innerHTML = "";
       updateThemeUI("Auto", "Nouvelle page prête");
       $("companyChip").textContent = "Société: -";
       $("status").textContent = "Nouvelle note prête";
+      $("editBanner").classList.remove("active");
+      $("saveBtn").textContent = "Enregistrer la note";
     }
 
     function newNote() {
@@ -1024,22 +1488,38 @@
     function renderNotes() {
       const tf = $("filterTheme").value;
       const cf = $("filterCompany").value;
-      const filtered = state.notes.map((n, index) => ({ n, index })).filter(({ n }) =>
-        (tf === "Tous thèmes" || n.theme === tf) &&
-        (cf === "Toutes sociétés" || n.company === cf)
-      );
+      const sf = $("filterStatus").value;
+      const search = normalizeForMatch($("searchNotes").value || "");
+      const filtered = state.notes
+        .map((n, index) => ({ n: withNoteDefaults(n), index }))
+        .filter(({ n }) =>
+          (tf === "Tous thèmes" || n.theme === tf) &&
+          (cf === "Toutes sociétés" || n.company === cf) &&
+          (sf === "Tous statuts" || n.status === sf) &&
+          (!search || normalizeForMatch(noteSearchText(n)).includes(search))
+        );
       $("notesList").innerHTML = filtered.length ? filtered.map(({ n, index }) => `
         <div class="item">
           <div class="item-title">
             <strong>${escapeHtml(n.title || "Note sans titre")}</strong>
             <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end">
-              <span class="tiny">${escapeHtml(n.createdAt)}</span>
+              <span class="tiny">${escapeHtml(n.updatedAt ? `Modifiée ${n.updatedAt}` : n.createdAt)}</span>
+              ${isAlertDue(n) ? `<a class="btn" href="${buildReminderMailto(n)}" title="Préparer un mail de relance">Mail alerte</a>` : ""}
+              <button class="btn" data-edit-note="${index}" title="Modifier cette note">Modifier</button>
               <button class="btn icon-danger" data-delete-note="${index}" title="Supprimer cette note">Supprimer</button>
             </div>
           </div>
           <div class="chips">
             <span class="chip">${escapeHtml(n.company)}</span>
             <span class="chip">${escapeHtml(n.theme)}</span>
+          </div>
+          <div class="note-meta">
+            <span class="chip" data-status="${escapeHtml(n.status)}">${escapeHtml(n.status)}</span>
+            <span class="chip" data-risk="${escapeHtml(n.risk)}">Risque: ${escapeHtml(n.risk)}</span>
+            ${isAlertDue(n) ? `<span class="chip alert">${escapeHtml(alertLabel(n))}</span>` : ""}
+            ${n.dueDate ? `<span class="chip">Échéance: ${escapeHtml(formatDate(n.dueDate))}</span>` : ""}
+            ${n.owner ? `<span class="chip">Resp.: ${escapeHtml(n.owner)}</span>` : ""}
+            ${n.amount ? `<span class="chip">Montant: ${escapeHtml(n.amount)}</span>` : ""}
           </div>
           <div style="margin-top:10px" class="muted">${escapeHtml(n.note)}</div>
         </div>
@@ -1050,15 +1530,251 @@
       if (index < 0 || index >= state.notes.length) return;
       const note = state.notes[index];
       if (!note) return;
+      const ok = confirm(`Supprimer définitivement la note "${note.title || "sans titre"}" ?`);
+      if (!ok) return;
       state.notes.splice(index, 1);
+      if (state.editingIndex === index) clearCurrentDraft();
+      if (Number.isInteger(state.editingIndex) && state.editingIndex > index) state.editingIndex -= 1;
       persist();
       renderNotes();
+      renderAlertView();
       showToast("Note supprimée");
       $("status").textContent = "Note supprimée";
     }
 
+    function editNote(index) {
+      if (index < 0 || index >= state.notes.length) return;
+      const note = withNoteDefaults(state.notes[index]);
+      state.editingIndex = index;
+      $("title").value = note.title || "";
+      $("note").value = editableNoteText(note);
+      $("company").value = state.companies.includes(note.company) ? note.company : "Toutes sociétés";
+      $("statusField").value = note.status;
+      $("riskField").value = note.risk;
+      $("dueDateField").value = note.dueDate;
+      $("ownerField").value = note.owner;
+      $("amountField").value = note.amount;
+      $("summary").textContent = note.aiSummary || note.note || "Aucune note saisie.";
+      $("questions").innerHTML = (note.aiQuestions || suggestQuestions(note.theme, note.note || ""))
+        .map(q => `<div class="item">${escapeHtml(q)}</div>`)
+        .join("");
+      updateThemeUI(note.theme || "Auto", "Modification d'une note enregistrée");
+      $("companyChip").textContent = `Société: ${note.company || "-"}`;
+      $("status").textContent = "Note chargée en édition";
+      $("editBanner").textContent = `Mode édition: ${note.title || "note sans titre"}`;
+      $("editBanner").classList.add("active");
+      $("saveBtn").textContent = "Mettre à jour la note";
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
     function escapeHtml(str) {
+      str = String(str ?? "");
       return str.replace(/[&<>"']/g, s => ({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[s]));
+    }
+
+    function formatDate(value) {
+      if (!value) return "";
+      const [year, month, day] = value.split("-");
+      return day && month && year ? `${day}/${month}/${year}` : value;
+    }
+
+    function alertLabel(note) {
+      const days = daysUntil(note.dueDate);
+      if (days === null) return "Alerte échéance";
+      if (days < 0) return `En retard de ${Math.abs(days)} j`;
+      if (days === 0) return "Échéance aujourd'hui";
+      return `Alerte J-${days}`;
+    }
+
+    function buildReminderMailto(note) {
+      const subject = encodeURIComponent(`Alerte Nona - ${note.title || "note à traiter"}`);
+      const body = encodeURIComponent([
+        `Sujet: ${note.title || "Note à traiter"}`,
+        `Société: ${note.company || "-"}`,
+        `Échéance: ${formatDate(note.dueDate) || "-"}`,
+        `Responsable: ${note.owner || "-"}`,
+        `Risque: ${note.risk || "-"}`,
+        "",
+        "Action attendue:",
+        "",
+        "Résumé:",
+        note.aiSummary || note.note || ""
+      ].join("\n"));
+      return `mailto:?subject=${subject}&body=${body}`;
+    }
+
+    function openNotes() {
+      return state.notes.map(withNoteDefaults).filter(note => note.status !== "Terminé");
+    }
+
+    function alertNotes() {
+      return openNotes().filter(note => isAlertDue(note) || note.risk === "Fort" || note.risk === "Critique" || !note.owner);
+    }
+
+    function buildMonthlyDigestMailto() {
+      const notes = openNotes();
+      const subject = encodeURIComponent(`Nona - synthèse mensuelle des notes non clôturées`);
+      const lines = [
+        "Bonjour,",
+        "",
+        "Voici la synthèse mensuelle des notes Nona non clôturées.",
+        "",
+        ...notes.map((note, index) => [
+          `${index + 1}. ${note.title || "Note sans titre"}`,
+          `   Société: ${note.company || "-"}`,
+          `   Statut: ${note.status || "-"}`,
+          `   Échéance: ${formatDate(note.dueDate) || "-"}`,
+          `   Responsable: ${note.owner || "-"}`,
+          `   Risque: ${note.risk || "-"}`,
+          `   Montant: ${note.amount || "-"}`,
+          `   Résumé: ${(note.aiSummary || note.note || "").replace(/\s+/g, " ").slice(0, 220)}`,
+          ""
+        ].join("\n")),
+        notes.length ? "" : "Aucune note ouverte.",
+        "Bonne journée,"
+      ];
+      return `mailto:?subject=${subject}&body=${encodeURIComponent(lines.join("\n"))}`;
+    }
+
+    function openMonthlyDigestMail() {
+      window.location.href = buildMonthlyDigestMailto();
+      showToast("Mail mensuel préparé");
+    }
+
+    async function callBackend(path, options = {}) {
+      if (!state.mailBackendUrl) throw new Error("Backend mails non configuré");
+      const response = await fetch(`${state.mailBackendUrl.replace(/\/$/, "")}${path}`, {
+        method: options.method || "GET",
+        headers: { "Content-Type": "application/json" },
+        body: options.body ? JSON.stringify(options.body) : undefined
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || data.ok === false) throw new Error(data.error || `Backend ${response.status}`);
+      return data;
+    }
+
+    function syncNotesToBackend() {
+      if (!state.apiBaseUrl) return;
+      callBackend("/api/sync-notes", {
+        method: "POST",
+        body: { notes: state.notes, companies: state.companies }
+      }).catch(() => {
+        // backend optional: keep the app usable offline
+      });
+    }
+
+    async function testMailBackend() {
+      try {
+        const status = await callBackend("/api/status");
+        $("status").textContent = `Backend mails OK: ${status.mode}, ${status.openNotes} notes ouvertes`;
+        showToast("Backend mails OK");
+      } catch (error) {
+        $("status").textContent = `Backend mails indisponible`;
+        showToast("Backend indisponible");
+      }
+    }
+
+    async function runBackendAlerts() {
+      try {
+        await callBackend("/api/sync-notes", {
+          method: "POST",
+          body: { notes: state.notes, companies: state.companies }
+        });
+        const result = await callBackend("/api/run-alerts", { method: "POST" });
+        $("status").textContent = `${result.sent?.length || 0} relance(s) J-10 préparée(s)`;
+        showToast("Relances backend lancées");
+      } catch (error) {
+        $("status").textContent = "Relances backend indisponibles";
+        showToast("Backend indisponible");
+      }
+    }
+
+    async function runBackendMonthlyDigest() {
+      try {
+        await callBackend("/api/sync-notes", {
+          method: "POST",
+          body: { notes: state.notes, companies: state.companies }
+        });
+        const result = await callBackend("/api/monthly-digest?force=1", { method: "POST" });
+        $("status").textContent = result.sent ? "Digest mensuel backend préparé" : "Digest mensuel déjà préparé";
+        showToast("Digest backend lancé");
+      } catch (error) {
+        openMonthlyDigestMail();
+      }
+    }
+
+    function renderAlertView() {
+      const notes = state.notes.map(withNoteDefaults);
+      const open = notes.filter(note => note.status !== "Terminé");
+      const alerts = alertNotes();
+      const late = open.filter(note => {
+        const days = daysUntil(note.dueDate);
+        return days !== null && days < 0;
+      });
+      const soon = open.filter(note => {
+        const days = daysUntil(note.dueDate);
+        return days !== null && days >= 0 && days <= 10;
+      });
+      const noOwner = open.filter(note => !note.owner);
+
+      $("alertSummary").innerHTML = [
+        ["Ouvertes", open.length],
+        ["J-10", soon.length],
+        ["En retard", late.length],
+        ["Sans responsable", noOwner.length]
+      ].map(([label, value]) => `
+        <div class="alert-kpi">
+          <strong>${value}</strong>
+          <span class="tiny">${label}</span>
+        </div>
+      `).join("");
+
+      $("alertList").innerHTML = alerts.length ? alerts.slice(0, 8).map(note => `
+        <div class="item">
+          <div class="item-title">
+            <strong>${escapeHtml(note.title || "Note sans titre")}</strong>
+            <a class="btn" href="${buildReminderMailto(note)}">Relance mail</a>
+          </div>
+          <div class="note-meta">
+            <span class="chip">${escapeHtml(note.company || "-")}</span>
+            ${isAlertDue(note) ? `<span class="chip alert">${escapeHtml(alertLabel(note))}</span>` : ""}
+            ${!note.owner ? `<span class="chip alert">Sans responsable</span>` : ""}
+            <span class="chip" data-risk="${escapeHtml(note.risk)}">Risque: ${escapeHtml(note.risk)}</span>
+            <span class="chip">Échéance: ${escapeHtml(formatDate(note.dueDate) || "-")}</span>
+          </div>
+        </div>
+      `).join("") : `<div class="item">Aucune alerte active. Les notes ouvertes restent suivies dans la liste.</div>`;
+    }
+
+    function notifyUpcomingDeadlines() {
+      if (!("Notification" in window) || Notification.permission !== "granted") return;
+      const todayKey = toDateInputValue(new Date());
+      if (localStorage.getItem(ALERT_KEY) === todayKey) return;
+      const alerts = state.notes.map(withNoteDefaults).filter(isAlertDue);
+      if (!alerts.length) return;
+      const first = alerts[0];
+      new Notification("Nona - échéances proches", {
+        body: alerts.length === 1
+          ? `${first.title || "Note à traiter"}: ${alertLabel(first)}`
+          : `${alerts.length} notes arrivent à échéance ou sont en retard.`
+      });
+      localStorage.setItem(ALERT_KEY, todayKey);
+    }
+
+    async function enableDeadlineNotifications() {
+      if (!("Notification" in window)) {
+        showToast("Notifications non supportées");
+        return;
+      }
+      const permission = Notification.permission === "default"
+        ? await Notification.requestPermission()
+        : Notification.permission;
+      if (permission === "granted") {
+        showToast("Notifications échéances activées");
+        notifyUpcomingDeadlines();
+      } else {
+        showToast("Notifications non activées");
+      }
     }
 
     function getSpeechRecognition() {
@@ -1111,6 +1827,7 @@
         notes: state.notes,
         companies: state.companies
       }));
+      syncNotesToBackend();
     }
 
     function restore() {
@@ -1118,7 +1835,7 @@
         const raw = localStorage.getItem(STORAGE_KEY);
         if (!raw) return;
         const data = JSON.parse(raw);
-        if (Array.isArray(data.notes)) state.notes = data.notes;
+        if (Array.isArray(data.notes)) state.notes = data.notes.map(withNoteDefaults);
         if (Array.isArray(data.companies) && data.companies.length) state.companies = data.companies;
       } catch {
         // ignore corrupted local data
@@ -1130,6 +1847,7 @@
         state.openaiKey = settings.openaiKey || "";
         state.openaiModel = settings.openaiModel || state.openaiModel;
         state.apiBaseUrl = settings.apiBaseUrl || "";
+        state.mailBackendUrl = settings.mailBackendUrl || state.mailBackendUrl;
       } catch {
         // ignore corrupted settings
       }
@@ -1139,7 +1857,7 @@
       const merged = [...new Set([...state.companies])];
       state.companies = merged;
       const items = ["Toutes sociétés", ...merged];
-      fillSelect($("company"), merged);
+      fillSelect($("company"), items);
       fillSelect($("filterCompany"), items);
     }
 
@@ -1166,6 +1884,11 @@
       if (Number.isFinite(index)) deleteNote(index);
     }
 
+    function editNoteByTarget(target) {
+      const index = Number(target.getAttribute("data-edit-note"));
+      if (Number.isFinite(index)) editNote(index);
+    }
+
     function addCompany() {
       const value = $("newCompany").value.trim();
       if (!value) return;
@@ -1184,10 +1907,12 @@
       state.openaiKey = $("openaiKey").value.trim();
       state.openaiModel = $("openaiModel").value;
       state.apiBaseUrl = $("apiBaseUrl").value.trim();
+      state.mailBackendUrl = $("mailBackendUrl").value.trim();
       localStorage.setItem(SETTINGS_KEY, JSON.stringify({
         openaiKey: state.openaiKey,
         openaiModel: state.openaiModel,
-        apiBaseUrl: state.apiBaseUrl
+        apiBaseUrl: state.apiBaseUrl,
+        mailBackendUrl: state.mailBackendUrl
       }));
       $("status").textContent = "Clé OpenAI enregistrée localement";
       showToast("Paramètres enregistrés");
@@ -1216,6 +1941,7 @@
     $("openaiKey").value = state.openaiKey;
     $("openaiModel").value = state.openaiModel;
     $("apiBaseUrl").value = state.apiBaseUrl;
+    $("mailBackendUrl").value = state.mailBackendUrl;
 
     $("analyzeAiBtn").addEventListener("click", analyzeSmart);
     $("saveBtn").addEventListener("click", saveCurrent);
@@ -1223,26 +1949,58 @@
     $("dictateBtn").addEventListener("click", startDictation);
     $("addCompanyBtn").addEventListener("click", addCompany);
     $("saveKeyBtn").addEventListener("click", saveKey);
+    $("enableAlertsBtn").addEventListener("click", enableDeadlineNotifications);
+    $("enableAlertsTopBtn").addEventListener("click", enableDeadlineNotifications);
+    $("monthlyMailBtn").addEventListener("click", runBackendMonthlyDigest);
+    $("backendAlertsBtn").addEventListener("click", runBackendAlerts);
+    $("backendStatusBtn").addEventListener("click", testMailBackend);
     $("refreshCompaniesBtn").addEventListener("click", () => {
       refreshCompanySelects();
       persist();
       $("status").textContent = "Sociétés SharePoint rechargées";
     });
     $("notesList").addEventListener("click", (event) => {
-      const btn = event.target.closest("[data-delete-note]");
-      if (!btn) return;
-      deleteNoteByTarget(btn);
+      const deleteBtn = event.target.closest("[data-delete-note]");
+      if (deleteBtn) {
+        deleteNoteByTarget(deleteBtn);
+        return;
+      }
+      const editBtn = event.target.closest("[data-edit-note]");
+      if (editBtn) editNoteByTarget(editBtn);
     });
     $("filterTheme").addEventListener("change", renderNotes);
     $("filterCompany").addEventListener("change", renderNotes);
+    $("filterStatus").addEventListener("change", renderNotes);
+    $("searchNotes").addEventListener("input", renderNotes);
     $("newCompany").addEventListener("keydown", (e) => {
       if (e.key === "Enter") addCompany();
     });
     $("title").addEventListener("input", updateCompanySuggestion);
     $("note").addEventListener("input", updateCompanySuggestion);
+    $("title").addEventListener("input", updateAmountSuggestion);
+    $("note").addEventListener("input", updateAmountSuggestion);
+    $("amountField").addEventListener("input", () => {
+      $("amountField").dataset.autoAmount = "";
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.ctrlKey && event.key === "Enter") {
+        event.preventDefault();
+        analyzeSmart();
+      }
+      if (event.ctrlKey && event.key.toLowerCase() === "s") {
+        event.preventDefault();
+        saveCurrent();
+      }
+      if (event.ctrlKey && event.key.toLowerCase() === "n") {
+        event.preventDefault();
+        newNote();
+      }
+    });
 
     renderNotes();
+    renderAlertView();
     clearCurrentDraft();
+    notifyUpcomingDeadlines();
   </script>
 </body>
 </html>
