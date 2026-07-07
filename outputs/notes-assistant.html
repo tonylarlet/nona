@@ -275,6 +275,7 @@
     .note-toolbar .btn.newnote{flex:1.15 1 0}
     .note-toolbar .btn.voice{flex:0 0 78px}
     .note-toolbar .btn.analyze{flex:1.15 1 0}
+    .note-toolbar .btn.save-wide{flex:1.15 1 0}
     .note-toolbar .btn.promo{
       background:linear-gradient(180deg, #c53b2b, #98251a);
       color:#fff;
@@ -285,6 +286,13 @@
       background:linear-gradient(180deg, #f6f8fb, #d7e3f1);
       color:#1c2f45;
       border-color:#5b7895;
+      box-shadow:inset 1px 1px 0 rgba(255,255,255,.86), 0 10px 24px rgba(0,0,0,.12);
+      text-shadow:none;
+    }
+    .note-toolbar .btn.save-wide{
+      background:linear-gradient(180deg, #d9ebff, #7aa7d9);
+      color:#10263f;
+      border-color:#4b6d93;
       box-shadow:inset 1px 1px 0 rgba(255,255,255,.86), 0 10px 24px rgba(0,0,0,.12);
       text-shadow:none;
     }
@@ -727,6 +735,288 @@
       .note-row-actions{grid-template-columns:1fr}
       .alert-summary{grid-template-columns:1fr 1fr}
     }
+
+    /* Art deco direction */
+    :root{
+      --bg:#111318;
+      --panel:#fbf5e6;
+      --panel-2:#efe3c5;
+      --text:#151515;
+      --muted:#6d6048;
+      --accent:#0f3f46;
+      --accent-2:#b78b2f;
+      --accent-3:#8b2f2b;
+      --accent-4:#1f6b5f;
+      --line:#b78b2f;
+      --shadow:0 18px 36px rgba(0,0,0,.26);
+      --radius:2px;
+    }
+    body{
+      font-family:"Segoe UI", "Trebuchet MS", Arial, sans-serif;
+      background:
+        linear-gradient(90deg, rgba(183,139,47,.10) 1px, transparent 1px),
+        linear-gradient(180deg, #17191f 0%, #263138 48%, #17191f 100%);
+      background-size:28px 28px, auto;
+    }
+    body::before{
+      background:
+        linear-gradient(135deg, transparent 0 46%, rgba(183,139,47,.16) 46% 48%, transparent 48% 52%, rgba(183,139,47,.16) 52% 54%, transparent 54%),
+        linear-gradient(45deg, transparent 0 46%, rgba(255,255,255,.06) 46% 47%, transparent 47%);
+      opacity:.5;
+    }
+    .hero{
+      border-bottom:1px solid rgba(183,139,47,.55);
+      margin-bottom:18px;
+    }
+    .hero h1{
+      font-family:Georgia, "Times New Roman", serif;
+      color:#f8edcf;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      text-shadow:0 2px 0 #000, 0 12px 28px rgba(0,0,0,.4);
+    }
+    .hero h1::after{
+      content:"";
+      display:block;
+      width:96px;
+      height:3px;
+      margin-top:10px;
+      background:linear-gradient(90deg, transparent, #d7b35f, transparent);
+    }
+    .card{
+      background:linear-gradient(180deg, #fff8e9, #eadfbe);
+      border:1px solid #b78b2f;
+      backdrop-filter:none;
+      box-shadow:0 16px 34px rgba(0,0,0,.24), inset 0 0 0 2px rgba(255,255,255,.42), inset 0 0 0 5px rgba(183,139,47,.16);
+    }
+    .card::after{
+      background:
+        linear-gradient(135deg, transparent 0 49%, rgba(183,139,47,.14) 49% 51%, transparent 51%),
+        linear-gradient(180deg, rgba(255,255,255,.18), transparent 38%);
+    }
+    .card.tech,
+    .card.tech .card-body{
+      background:linear-gradient(180deg, #fff8e9, #eadfbe);
+    }
+    .card-head,
+    .card.tech .card-head{
+      background:linear-gradient(180deg, #132b31, #0b1d22);
+      border-bottom:2px solid #b78b2f;
+      color:#f8edcf;
+    }
+    .card h2{
+      font-family:Georgia, "Times New Roman", serif;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+    }
+    .card-head .tiny,
+    .card-head .chip{
+      color:#f8edcf;
+    }
+    label,
+    .form-zone-title,
+    .tag{
+      color:#17373d;
+      letter-spacing:.12em;
+    }
+    input,
+    select,
+    textarea{
+      border:1px solid #b78b2f;
+      background:linear-gradient(180deg, #fffdf6, #f3ead3);
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.75);
+    }
+    input:focus,
+    select:focus,
+    textarea:focus{
+      border-color:#0f3f46;
+      box-shadow:0 0 0 3px rgba(183,139,47,.24), inset 0 0 0 1px rgba(255,255,255,.9);
+    }
+    .btn,
+    .pill,
+    .chip{
+      border:1px solid #b78b2f;
+      background:linear-gradient(180deg, #fff8e5, #d7c18a);
+      color:#16282c;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.7);
+      text-transform:uppercase;
+      letter-spacing:.06em;
+    }
+    .btn.secondary,
+    .btn.newnote,
+    .note-toolbar .btn.analyze,
+    .note-toolbar .btn.save-wide,
+    .note-actions .btn.save-wide{
+      background:linear-gradient(180deg, #17606b, #0d3239);
+      border-color:#d7b35f;
+      color:#fff4d4;
+      text-shadow:none;
+    }
+    .note-toolbar .btn.promo{
+      background:linear-gradient(180deg, #d1a548, #8e681d);
+      border-color:#f3d47a;
+      color:#17130a;
+      text-shadow:none;
+    }
+    .form-zone,
+    details.advanced{
+      background:rgba(255,253,246,.56);
+      border:1px solid rgba(183,139,47,.72);
+      box-shadow:inset 0 0 0 2px rgba(255,255,255,.32);
+    }
+    .form-zone-title{
+      list-style:none;
+      cursor:pointer;
+      border-bottom:1px solid rgba(183,139,47,.5);
+    }
+    .form-zone-title::-webkit-details-marker{display:none}
+    .follow-up-panel:not([open]){
+      padding-bottom:8px;
+    }
+    .follow-up-panel:not([open]) .form-zone-title{
+      margin-bottom:0;
+      border-bottom:0;
+    }
+    .theme-banner{
+      border-radius:0;
+      background:linear-gradient(180deg, #172d32, #0d1d21);
+      border-color:#d7b35f;
+      color:#f8edcf;
+    }
+    .theme-banner .label,
+    .theme-banner .hint,
+    .theme-banner .value{
+      color:#f8edcf;
+    }
+    .item,
+    .alert-kpi{
+      background:linear-gradient(180deg, #fffdf6, #eadfbe);
+      border-color:#b78b2f;
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.55);
+    }
+    .toast{
+      background:#102a30;
+      border:1px solid #d7b35f;
+      color:#fff4d4;
+    }
+
+    @media (max-width: 720px){
+      body{
+        background:
+          linear-gradient(90deg, rgba(183,139,47,.11) 1px, transparent 1px),
+          linear-gradient(180deg, #111318 0%, #253037 100%);
+        background-size:24px 24px, auto;
+      }
+      .wrap{
+        display:flex;
+        flex-direction:column;
+        padding:12px 10px 92px;
+      }
+      .hero{order:0;margin-bottom:10px}
+      .hero h1{
+        font-size:32px;
+        letter-spacing:.12em;
+      }
+      .mobile-tabs{
+        order:1;
+        position:sticky;
+        top:0;
+        grid-template-columns:repeat(3, 1fr);
+        border-color:#b78b2f;
+        background:#101f24;
+      }
+      .mobile-tabs a{
+        min-height:38px;
+        background:transparent;
+        color:#f8edcf;
+        border-color:rgba(183,139,47,.66);
+      }
+      .mobile-tabs a:nth-child(3){display:none}
+      .board{order:2}
+      #alertsSection{order:3}
+      #notesSection{order:4}
+      #aiSection{
+        order:2;
+      }
+      .board{
+        display:flex;
+        flex-direction:column;
+        align-items:stretch;
+      }
+      #noteSection{order:1}
+      #aiSection{order:2}
+      #alertsSection .card-body,
+      #notesSection .filter-grid,
+      .maintenance-actions{
+        display:none;
+      }
+      #alertsSection .card-head,
+      #notesSection .card-head{
+        padding:12px 14px;
+      }
+      #alertsSection .alert-actions{
+        display:none;
+      }
+      .theme-banner{
+        padding:9px 11px;
+        margin-bottom:10px;
+      }
+      .theme-banner .hint{
+        display:none;
+      }
+      .theme-banner .label{
+        font-size:10px;
+      }
+      .theme-banner .value{
+        font-size:18px;
+      }
+      .form-zone{
+        padding:11px;
+      }
+      .form-zone-title span:last-child{
+        display:none;
+      }
+      .follow-up-panel:not([open])::after,
+      details.advanced:not([open])::after{
+        content:"Touchez pour ouvrir";
+        display:block;
+        margin-top:4px;
+        color:#6d6048;
+        font-size:12px;
+      }
+      .note-toolbar{
+        position:fixed;
+        left:10px;
+        right:10px;
+        bottom:10px;
+        z-index:40;
+        grid-template-columns:54px 50px 1fr 1fr;
+        padding:8px;
+        border:1px solid #d7b35f;
+        background:rgba(16,31,36,.95);
+        box-shadow:0 14px 34px rgba(0,0,0,.35);
+      }
+      .note-toolbar .btn{
+        min-height:48px;
+        padding:9px 7px;
+        font-size:12px;
+      }
+      .note-actions .btn.save-wide{
+        min-height:54px;
+        font-size:15px;
+      }
+      details.advanced{
+        margin-top:12px;
+      }
+      details.advanced > summary{
+        color:#17373d;
+        text-transform:uppercase;
+        letter-spacing:.1em;
+      }
+      .notes .item:nth-child(n+4){
+        display:none;
+      }
+    }
   </style>
 </head>
 <body>
@@ -799,13 +1089,17 @@
               <label for="note">Note</label>
               <textarea id="note" placeholder="Écris ici ta note de réunion, ton idée ou ton sujet..."></textarea>
             </div>
+            <div class="field">
+              <label for="amountField">Montant</label>
+              <input id="amountField" placeholder="Ex. 2 500 000 XPF" />
+            </div>
           </div>
 
-          <div class="form-zone">
-            <div class="form-zone-title">
+          <details class="form-zone follow-up-panel">
+            <summary class="form-zone-title">
               <span>Suivi</span>
               <span>échéance, risque, responsable</span>
-            </div>
+            </summary>
             <div class="business-grid">
               <div class="field">
                 <label for="statusField">Statut</label>
@@ -832,24 +1126,17 @@
                 <label for="ownerField">Responsable</label>
                 <input id="ownerField" placeholder="Ex. moi, compta, RH..." />
               </div>
-              <div class="field">
-                <label for="amountField">Montant</label>
-                <input id="amountField" placeholder="Ex. 2 500 000 XPF" />
-              </div>
             </div>
-          </div>
+          </details>
           <div class="note-toolbar">
             <button class="btn newnote promo" id="newNoteBtn" title="Efface la saisie et prépare une nouvelle note">NEW</button>
             <button class="btn voice" id="dictateBtn" title="Dicter la note">🎙</button>
             <button class="btn analyze" id="analyzeAiBtn" title="Analyse via OpenAI">Analyse IA</button>
+            <button class="btn secondary save-wide" id="saveBtn">Enregistrer</button>
           </div>
-          <div class="note-actions">
-            <button class="btn secondary save-wide" id="saveBtn">Enregistrer la note</button>
+          <div class="note-actions maintenance-actions">
             <button class="btn ghost" id="refreshCompaniesBtn">Rafraîchir sociétés SharePoint</button>
             <button class="btn ghost" id="enableAlertsBtn">Activer notifications échéances</button>
-          </div>
-          <div class="note-actions">
-            <button class="btn" id="saveKeyBtn">Sauver les paramètres</button>
           </div>
           <details class="advanced">
             <summary>Paramètres avancés</summary>
@@ -877,6 +1164,7 @@
                 <input id="mailBackendUrl" placeholder="http://127.0.0.1:8798" />
               </div>
               <div class="note-actions">
+                <button class="btn" id="saveKeyBtn">Sauver les paramètres</button>
                 <button class="btn" id="backendStatusBtn">Tester backend mails</button>
               </div>
               <div class="meta">
