@@ -1,0 +1,723 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Nona</title>
+  <style>
+    :root{
+      --bg:#f6f1e8;
+      --panel:#fffaf1;
+      --panel-2:#f1e7d6;
+      --text:#1f1b16;
+      --muted:#665b4f;
+      --accent:#b65c2c;
+      --accent-2:#276b5f;
+      --line:#ddcfbf;
+      --shadow:0 18px 50px rgba(50,30,10,.12);
+      --radius:22px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(182,92,44,.10), transparent 30%),
+        radial-gradient(circle at top right, rgba(39,107,95,.12), transparent 24%),
+        linear-gradient(180deg, #f8f3ea 0%, #efe4d0 100%);
+      min-height:100vh;
+    }
+    .wrap{max-width:1280px;margin:0 auto;padding:28px}
+    header{
+      display:flex;justify-content:space-between;gap:16px;align-items:end;flex-wrap:wrap;
+      margin-bottom:22px;
+    }
+    h1{margin:0;font-size:clamp(28px,4vw,48px);letter-spacing:-.03em}
+    .sub{color:var(--muted);max-width:760px;line-height:1.5}
+    .grid{display:grid;grid-template-columns:1.2fr .8fr;gap:18px}
+    @media (max-width: 960px){.grid{grid-template-columns:1fr}}
+    .card{
+      background:rgba(255,250,241,.86);
+      border:1px solid rgba(221,207,191,.95);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+      backdrop-filter: blur(8px);
+    }
+    .card h2{margin:0;font-size:18px}
+    .card-head{
+      padding:18px 20px;
+      border-bottom:1px solid var(--line);
+      display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;
+      background:linear-gradient(180deg, rgba(255,255,255,.45), rgba(255,255,255,0));
+    }
+    .card-body{padding:20px}
+    .toolbar{display:flex;gap:10px;flex-wrap:wrap}
+    .pill,.btn,.chip{
+      border:1px solid var(--line);
+      background:#fff;
+      color:var(--text);
+      border-radius:999px;
+      padding:10px 14px;
+      font-weight:600;
+      cursor:pointer;
+      transition:.18s ease;
+    }
+    .pill:hover,.btn:hover,.chip:hover{transform:translateY(-1px);border-color:#c2b39e}
+    .btn.primary{background:var(--accent);color:white;border-color:transparent}
+    .btn.secondary{background:var(--accent-2);color:white;border-color:transparent}
+    .field{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+    label{font-size:13px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+    input,select,textarea{
+      width:100%;
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:13px 14px;
+      font:inherit;
+      background:white;
+      color:var(--text);
+      outline:none;
+    }
+    textarea{min-height:220px;resize:vertical;line-height:1.45}
+    input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 4px rgba(182,92,44,.10)}
+    .meta{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    @media (max-width:700px){.meta{grid-template-columns:1fr}}
+    .suggestions,.notes{
+      display:grid;
+      gap:12px;
+    }
+    .item{
+      background:var(--panel);
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:14px;
+    }
+    .item-title{display:flex;justify-content:space-between;gap:12px;align-items:start}
+    .item-title strong{font-size:15px}
+    .muted{color:var(--muted);font-size:13px;line-height:1.45}
+    .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    .chip{padding:6px 10px;font-size:12px;background:#fff7ef}
+    .tag{font-size:12px;font-weight:800;color:var(--accent-2)}
+    .layout{display:grid;grid-template-columns:1fr;gap:18px}
+    .note-preview{white-space:pre-wrap;line-height:1.5}
+    .split{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    @media (max-width: 700px){.split{grid-template-columns:1fr}}
+    .toplist{display:flex;gap:8px;flex-wrap:wrap}
+    .tiny{font-size:12px;color:var(--muted)}
+    .danger{background:#fff1ee;color:#8c2b1c}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>Nona</h1>
+        <div class="sub">Prise de note rapide, classement par thème ou société, et relances intelligentes pour ne rien oublier côté admin, finance ou légal. Le prototype peut utiliser une vraie IA OpenAI et une liste de sociétés préchargée depuis ton SharePoint juridique.</div>
+      </div>
+      <div class="toolbar">
+        <button class="pill" id="demoFill">Charger un exemple</button>
+        <button class="pill" id="exportData">Exporter JSON</button>
+        <button class="pill" id="clearAll">Tout effacer</button>
+      </div>
+    </header>
+
+    <div class="grid">
+      <section class="card">
+        <div class="card-head">
+          <h2>Nouvelle note</h2>
+          <div class="tiny" id="status">Analyse prête</div>
+        </div>
+        <div class="card-body">
+          <div class="meta">
+            <div class="field">
+              <label for="openaiKey">Clé OpenAI API</label>
+              <input id="openaiKey" type="password" placeholder="sk-..." />
+            </div>
+            <div class="field">
+              <label for="openaiModel">Modèle</label>
+              <select id="openaiModel">
+                <option value="gpt-4.1-mini">gpt-4.1-mini</option>
+                <option value="gpt-5">gpt-5</option>
+                <option value="o3">o3</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label for="apiBaseUrl">URL du backend IA</label>
+            <input id="apiBaseUrl" placeholder="http://localhost:8787" />
+          </div>
+          <div class="tiny" style="margin:-4px 0 12px">La clé est stockée uniquement dans ton navigateur si tu l’enregistres localement.</div>
+          <div class="meta">
+            <div class="field">
+              <label for="company">Société</label>
+              <select id="company"></select>
+            </div>
+            <div class="field">
+              <label for="manualTheme">Thème manuel</label>
+              <select id="manualTheme"></select>
+            </div>
+          </div>
+          <div class="meta">
+            <div class="field">
+              <label for="newCompany">Ajouter une société</label>
+              <input id="newCompany" placeholder="Ex. SCI, magasin, holding, logistique..." />
+            </div>
+            <div class="field" style="justify-content:end">
+              <label style="opacity:0">Action</label>
+              <button class="btn" id="addCompanyBtn">Ajouter la société</button>
+            </div>
+          </div>
+          <div class="field">
+            <label for="title">Titre</label>
+            <input id="title" placeholder="Ex. réunion assurance, litige fournisseur, point trésorerie..." />
+          </div>
+          <div class="field">
+            <label for="note">Note</label>
+            <textarea id="note" placeholder="Écris ici ta note de réunion, ton idée ou ton sujet..."></textarea>
+          </div>
+          <div class="split">
+            <button class="btn primary" id="analyzeBtn">Analyser la note</button>
+            <button class="btn secondary" id="analyzeAiBtn">Analyse IA</button>
+            <button class="btn secondary" id="saveBtn">Enregistrer la note</button>
+          </div>
+          <div class="split" style="margin-top:10px">
+            <button class="btn" id="saveKeyBtn">Sauver la clé</button>
+            <button class="btn" id="refreshCompaniesBtn">Rafraîchir sociétés SharePoint</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2>Résultat IA</h2>
+          <div class="toplist">
+            <span class="chip" id="themeChip">Thème: -</span>
+            <span class="chip" id="companyChip">Société: -</span>
+          </div>
+        </div>
+        <div class="card-body layout">
+          <div class="item">
+            <div class="item-title">
+              <strong>Questions à poser</strong>
+              <span class="tag">relances</span>
+            </div>
+            <div class="suggestions" id="questions"></div>
+          </div>
+          <div class="item">
+            <div class="item-title">
+              <strong>Note classée</strong>
+              <span class="tag">synthèse</span>
+            </div>
+            <div class="note-preview" id="summary">Aucune note analysée pour le moment.</div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div style="height:18px"></div>
+
+    <section class="card">
+      <div class="card-head">
+        <h2>Notes enregistrées</h2>
+        <div class="tiny">Filtre par thème ou société directement ci-dessous</div>
+      </div>
+      <div class="card-body">
+        <div class="meta">
+          <div class="field">
+            <label for="filterTheme">Filtrer par thème</label>
+            <select id="filterTheme"></select>
+          </div>
+          <div class="field">
+            <label for="filterCompany">Filtrer par société</label>
+            <select id="filterCompany"></select>
+          </div>
+        </div>
+        <div class="notes" id="notesList"></div>
+      </div>
+    </section>
+  </div>
+
+  <script type="module">
+    const companies = [
+      "Toutes sociétés",
+      "Société A",
+      "Société B",
+      "Société C",
+      "Logistique NC",
+      "Logistique PF"
+    ];
+
+    const themes = [
+      "Tous thèmes",
+      "Admin",
+      "Financier",
+      "Légal",
+      "RH",
+      "Commercial",
+      "Logistique",
+      "Achats",
+      "Immobilier",
+      "IT"
+    ];
+
+    const themeRules = [
+      { theme: "Financier", words: ["trésorerie", "budget", "facture", "facturation", "encaissement", "paiement", "banque", "balance", "cash", "coût", "marge", "impôt", "taxe"] },
+      { theme: "Légal", words: ["contrat", "juridique", "litige", "avocat", "clause", "bail", "contentieux", "réglementaire", "conformité", "droit"] },
+      { theme: "RH", words: ["salarié", "contrat de travail", "paie", "recrutement", "entretien", "absence", "discipline", "formation", "direction du travail"] },
+      { theme: "Logistique", words: ["stock", "transport", "fret", "entrepôt", "livraison", "réception", "expédition", "conteneur", "douane"] },
+      { theme: "Commercial", words: ["vente", "client", "magasin", "merch", "promotion", "prix", "réclamation", "assortiment"] },
+      { theme: "Admin", words: ["administratif", "dossier", "procédure", "documents", "facture", "email", "courrier", "suivi"] },
+      { theme: "IT", words: ["serveur", "base de données", "mysql", "application", "bug", "logiciel", "écran", "connexion", "compte"] },
+      { theme: "Immobilier", words: ["local", "bail", "travaux", "chantier", "loyer", "surface", "parking"] },
+      { theme: "Achats", words: ["commande", "fournisseur", "devis", "approvisionnement", "négociation", "achat"] }
+    ];
+
+    const questionBank = {
+      Admin: ["Quel est le responsable du suivi ?", "Quelle est la prochaine échéance ?", "Quels documents faut-il archiver ?"],
+      Financier: ["Quel impact sur la trésorerie ?", "Y a-t-il une provision à prévoir ?", "Quel est le budget ou le montant en jeu ?"],
+      Légal: ["Quel est le risque juridique ?", "Faut-il une validation avocat/juriste ?", "Quel document contractuel doit être relu ?"],
+      RH: ["Qui porte le sujet côté RH ?", "Quel calendrier social faut-il anticiper ?", "Y a-t-il un risque disciplinaire ou paie ?"],
+      Commercial: ["Quel effet sur le CA ou la marge ?", "Quel magasin ou canal est concerné ?", "Quel client est impacté ?"],
+      Logistique: ["Quel délai de livraison est attendu ?", "Y a-t-il un point de stock ?", "Quel transporteur ou site est concerné ?"],
+      Achats: ["Quel fournisseur est concerné ?", "Faut-il comparer plusieurs devis ?", "Quel est le seuil de validation ?"],
+      Immobilier: ["Quel site ou local est concerné ?", "Y a-t-il des travaux ou un bail à renégocier ?", "Quel planning de réalisation ?"],
+      IT: ["Quel système est impacté ?", "Y a-t-il une sauvegarde ou un plan de secours ?", "Qui doit intervenir techniquement ?"],
+      Admin: ["Quel document manque-t-il ?", "Qui doit relancer ?", "Quelle preuve de traitement faut-il garder ?"]
+    };
+
+    const state = {
+      notes: [],
+      current: null,
+      companies: [
+        "BRICONC (APOTEX)",
+        "BRICONC2 (NILYTEX)",
+        "BRICOPF1",
+        "BRICOPF2",
+        "BRM DIFFUSION",
+        "CALEDOJOB",
+        "CHILI",
+        "DUTEX",
+        "EKEKO",
+        "GALLIENI 13",
+        "GOAL",
+        "GRAIN DE SEL",
+        "LOGISER",
+        "MARTRI",
+        "MOST LIFE",
+        "MOTEX",
+        "PR DIFFUSION",
+        "SC CAMERON INVEST",
+        "SC GRAND LARGE",
+        "SC LES LONNES",
+        "SC PUNAHERE",
+        "SCI AMPJOULE",
+        "SCI AROA HITI",
+        "SCI AUSTERLITZ",
+        "SCI CAMERON 1",
+        "SCI CAMERON 2",
+        "SCI CANAAN",
+        "SCI CHIRAZ CRUZ",
+        "SCI COLNETT 32",
+        "SCI CONCEPTION 56",
+        "SCI DU NORD 1",
+        "SCI GUYON 12",
+        "SCI HEIVARUE",
+        "SCI IMPASSE",
+        "SCI LES TOURS",
+        "SCI MARCILLAC 1",
+        "SCI MIRMAN",
+        "SCI PAEOTU 13",
+        "SCI PAO 7",
+        "SCI SIDE",
+        "SCI SOEURS",
+        "SCI TEMOANA",
+        "SCI VATEA",
+        "SCI VIRANI",
+        "SCI YAHOUE",
+        "SEFRACA",
+        "SEFRAKO",
+        "SEFRATEX",
+        "SEMAPA SAS",
+        "SERCOPAC NOUMEA",
+        "SERCOPAC PPTE",
+        "SERLOG",
+        "SMRC",
+        "SOCADIM",
+        "SOFADIF",
+        "SOMARI",
+        "SOMODIF",
+        "TAHITI LUMINAIRES",
+        "TAHITI PAS CHER",
+        "TAHITIJOB",
+        "TRITEX",
+        "SCI FOCH 25",
+        "AUSTRALIE DIVERS PLACEMENTS",
+        "SCI VILLA  DE GAULLE",
+        "SCI VERGAL",
+        "SCI GALLIENI 13",
+        "SCI GALLIENI 32",
+        "SCI APOGOTI FIRST",
+        "SCI APOGOTI SECOND",
+        "SCI les écoles",
+        "SCI CAPRICORNE",
+        "SCI AUTEUIL"
+      ],
+      openaiKey: "",
+      openaiModel: "gpt-4.1-mini",
+      apiBaseUrl: ""
+    };
+
+    const $ = (id) => document.getElementById(id);
+    const STORAGE_KEY = "notes-assistant-v1";
+    const SETTINGS_KEY = "notes-assistant-settings-v1";
+    const DEFAULT_COMPANIES = [...state.companies];
+
+    function fillSelect(select, items) {
+      select.innerHTML = items.map(v => `<option value="${v}">${v}</option>`).join("");
+    }
+
+    function detectTheme(text) {
+      const normalized = text.toLowerCase();
+      for (const rule of themeRules) {
+        if (rule.words.some(word => normalized.includes(word))) return rule.theme;
+      }
+      return "Admin";
+    }
+
+    function suggestQuestions(theme, text) {
+      const base = questionBank[theme] || questionBank.Admin;
+      const extra = [];
+      const lower = text.toLowerCase();
+      if (lower.includes("assurance")) extra.push("Le contrat ou la franchise a-t-il été vérifié ?");
+      if (lower.includes("agence") || lower.includes("magasin")) extra.push("Quel site ou point de vente est concerné ?");
+      if (lower.includes("impôt") || lower.includes("taxe")) extra.push("Faut-il valider avec l'expert-comptable ou le juriste fiscal ?");
+      if (lower.includes("contrat")) extra.push("Quelle clause ou annexe faut-il vérifier ?");
+      if (lower.includes("facture") || lower.includes("paiement")) extra.push("La TVA ou l'échéance de paiement pose-t-elle un sujet ?");
+      if (lower.includes("client")) extra.push("Y a-t-il un risque de réclamation ou d'impayé ?");
+      if (lower.includes("fournisseur")) extra.push("Le fournisseur doit-il être relancé ou challengé ?");
+      if (lower.includes("bail")) extra.push("Le bail impose-t-il un préavis ou une formalité ?");
+      if (lower.includes("rh")) extra.push("Faut-il une validation hiérarchique ou sociale ?");
+      return [...new Set([...extra, ...base])].slice(0, 5);
+    }
+
+    function renderQuestions(theme, text) {
+      const questions = suggestQuestions(theme, text);
+      $("questions").innerHTML = questions.map(q => `<div class="item">${q}</div>`).join("");
+    }
+
+    async function analyzeWithOpenAI(title, note) {
+      if (!state.openaiKey) throw new Error("Clé OpenAI manquante");
+      const prompt = [
+        "Tu es un assistant de prise de notes pour un DAF. Retourne STRICTEMENT du JSON valide, sans markdown.",
+        "Schéma attendu: {\"theme\":\"...\",\"company_hint\":\"...\",\"summary\":\"...\",\"questions\":[\"...\",\"...\"]}",
+        "Règles: theme doit être un seul mot parmi Admin, Financier, Légal, RH, Commercial, Logistique, Achats, Immobilier, IT, Stratégique, Autre.",
+        "company_hint doit être un nom de société si identifiable sinon chaîne vide.",
+        "summary doit être une synthèse courte et opérationnelle.",
+        "questions doit contenir 3 à 5 questions utiles, orientées risques, délais, validation, finance, juridique ou admin.",
+        "",
+        `Titre: ${title || "(sans titre)"}`,
+        `Note: ${note || "(vide)"}`
+      ].join("\n");
+
+      const response = await fetch("https://api.openai.com/v1/responses", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${state.openaiKey}`
+        },
+        body: JSON.stringify({
+          model: state.openaiModel,
+          input: prompt,
+          temperature: 0.2,
+          max_output_tokens: 500
+        })
+      });
+
+      if (!response.ok) {
+        const text = await response.text();
+        throw new Error(`OpenAI ${response.status}: ${text.slice(0, 180)}`);
+      }
+
+      const data = await response.json();
+      const textOutput = extractResponseText(data);
+      return safeParseAiJson(textOutput);
+    }
+
+    async function analyzeViaBackend(title, note) {
+      if (!state.apiBaseUrl) throw new Error("Backend IA manquant");
+      const response = await fetch(`${state.apiBaseUrl.replace(/\/$/, "")}/api/analyze`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title,
+          note,
+          model: state.openaiModel
+        })
+      });
+      if (!response.ok) {
+        const text = await response.text();
+        throw new Error(`Backend ${response.status}: ${text.slice(0, 180)}`);
+      }
+      return response.json();
+    }
+
+    function extractResponseText(data) {
+      if (typeof data.output_text === "string") return data.output_text;
+      const parts = [];
+      for (const item of data.output || []) {
+        for (const c of item.content || []) {
+          if (c.type === "output_text" && typeof c.text === "string") parts.push(c.text);
+        }
+      }
+      return parts.join("\n").trim();
+    }
+
+    function safeParseAiJson(text) {
+      const cleaned = text.trim().replace(/^```json\s*/i, "").replace(/```$/i, "");
+      return JSON.parse(cleaned);
+    }
+
+    function analyze() {
+      const title = $("title").value.trim();
+      const note = $("note").value.trim();
+      const company = $("company").value;
+      const manualTheme = $("manualTheme").value;
+      const detectedTheme = detectTheme(`${title} ${note}`);
+      const finalTheme = manualTheme !== "Auto" ? manualTheme : detectedTheme;
+      const combined = title ? `${title}\n\n${note}` : note;
+
+      state.current = { title, note: combined, company, theme: finalTheme, createdAt: new Date().toLocaleString("fr-FR") };
+
+      $("themeChip").textContent = `Thème: ${finalTheme}`;
+      $("companyChip").textContent = `Société: ${company}`;
+      $("summary").textContent = combined || "Aucune note saisie.";
+      renderQuestions(finalTheme, combined);
+      $("status").textContent = "Note analysée";
+      return state.current;
+    }
+
+    async function analyzeSmart() {
+      const title = $("title").value.trim();
+      const note = $("note").value.trim();
+      const manualTheme = $("manualTheme").value;
+      const company = $("company").value;
+      $("status").textContent = "Analyse IA en cours...";
+      try {
+        const ai = state.apiBaseUrl ? await analyzeViaBackend(title, note) : await analyzeWithOpenAI(title, note);
+        const finalTheme = manualTheme !== "Auto" ? manualTheme : (ai.theme || detectTheme(`${title} ${note}`));
+        const finalCompany = company !== "Toutes sociétés" ? company : (ai.company_hint || "Toutes sociétés");
+        const summary = ai.summary || (title ? `${title}\n\n${note}` : note);
+        const questions = Array.isArray(ai.questions) && ai.questions.length ? ai.questions : suggestQuestions(finalTheme, `${title} ${note}`);
+
+        state.current = {
+          title,
+          note: title ? `${title}\n\n${note}` : note,
+          company: finalCompany,
+          theme: finalTheme,
+          createdAt: new Date().toLocaleString("fr-FR"),
+          aiSummary: summary,
+          aiQuestions: questions
+        };
+
+        $("themeChip").textContent = `Thème: ${finalTheme}`;
+        $("companyChip").textContent = `Société: ${finalCompany}`;
+        $("summary").textContent = summary;
+        $("questions").innerHTML = questions.map(q => `<div class="item">${q}</div>`).join("");
+        $("status").textContent = "Analyse IA terminée";
+        return state.current;
+      } catch (error) {
+        $("status").textContent = `IA indisponible, mode local utilisé`;
+        return analyze();
+      }
+    }
+
+    function saveCurrent() {
+      const note = analyze();
+      if (!note.note.trim()) return;
+      state.notes.unshift(note);
+      persist();
+      renderNotes();
+      $("status").textContent = "Note enregistrée";
+    }
+
+    function renderNotes() {
+      const tf = $("filterTheme").value;
+      const cf = $("filterCompany").value;
+      const filtered = state.notes.filter(n =>
+        (tf === "Tous thèmes" || n.theme === tf) &&
+        (cf === "Toutes sociétés" || n.company === cf)
+      );
+      $("notesList").innerHTML = filtered.length ? filtered.map((n, i) => `
+        <div class="item">
+          <div class="item-title">
+            <strong>${escapeHtml(n.title || "Note sans titre")}</strong>
+            <span class="tiny">${escapeHtml(n.createdAt)}</span>
+          </div>
+          <div class="chips">
+            <span class="chip">${escapeHtml(n.company)}</span>
+            <span class="chip">${escapeHtml(n.theme)}</span>
+          </div>
+          <div style="margin-top:10px" class="muted">${escapeHtml(n.note)}</div>
+        </div>
+      `).join("") : `<div class="item danger">Aucune note ne correspond à ce filtre.</div>`;
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/[&<>"']/g, s => ({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[s]));
+    }
+
+    function demoFill() {
+      $("company").value = "SOCADIM";
+      $("manualTheme").value = "Auto";
+      $("title").value = "Réunion sur facture fournisseur et échéance de paiement";
+      $("note").value = "Point sur une facture litigieuse, besoin de vérifier le contrat, la TVA, le délai de paiement et le risque de relance.";
+      analyze();
+    }
+
+    function persist() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        notes: state.notes,
+        companies: state.companies
+      }));
+    }
+
+    function restore() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        const data = JSON.parse(raw);
+        if (Array.isArray(data.notes)) state.notes = data.notes;
+        if (Array.isArray(data.companies) && data.companies.length) state.companies = data.companies;
+      } catch {
+        // ignore corrupted local data
+      }
+      try {
+        const rawSettings = localStorage.getItem(SETTINGS_KEY);
+        if (!rawSettings) return;
+        const settings = JSON.parse(rawSettings);
+        state.openaiKey = settings.openaiKey || "";
+        state.openaiModel = settings.openaiModel || state.openaiModel;
+        state.apiBaseUrl = settings.apiBaseUrl || "";
+      } catch {
+        // ignore corrupted settings
+      }
+    }
+
+    function refreshCompanySelects() {
+      const merged = [...new Set([...state.companies])];
+      state.companies = merged;
+      const items = ["Toutes sociétés", ...merged];
+      fillSelect($("company"), merged);
+      fillSelect($("filterCompany"), items);
+    }
+
+    async function loadCompaniesFromJson() {
+      try {
+        const response = await fetch("companies.json", { cache: "no-store" });
+        if (!response.ok) return false;
+        const data = await response.json();
+        if (!Array.isArray(data.companies) || !data.companies.length) return false;
+        state.companies = [...new Set(data.companies.filter(Boolean))];
+        return true;
+      } catch {
+        return false;
+      }
+    }
+
+    function refreshThemeSelects() {
+      fillSelect($("manualTheme"), ["Auto", ...themes.slice(1)]);
+      fillSelect($("filterTheme"), themes);
+    }
+
+    function addCompany() {
+      const value = $("newCompany").value.trim();
+      if (!value) return;
+      if (!state.companies.includes(value)) {
+        state.companies.unshift(value);
+        persist();
+        refreshCompanySelects();
+      }
+      $("company").value = value;
+      $("filterCompany").value = "Toutes sociétés";
+      $("newCompany").value = "";
+      $("status").textContent = "Société ajoutée";
+    }
+
+    function saveKey() {
+      state.openaiKey = $("openaiKey").value.trim();
+      state.openaiModel = $("openaiModel").value;
+      state.apiBaseUrl = $("apiBaseUrl").value.trim();
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify({
+        openaiKey: state.openaiKey,
+        openaiModel: state.openaiModel,
+        apiBaseUrl: state.apiBaseUrl
+      }));
+      $("status").textContent = "Clé OpenAI enregistrée localement";
+    }
+
+    function exportJson() {
+      const payload = {
+        exportedAt: new Date().toISOString(),
+        companies: state.companies,
+        notes: state.notes
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "notes-assistant-export.json";
+      a.click();
+      URL.revokeObjectURL(url);
+      $("status").textContent = "Export JSON prêt";
+    }
+
+    await loadCompaniesFromJson();
+    restore();
+    refreshCompanySelects();
+    refreshThemeSelects();
+    $("openaiKey").value = state.openaiKey;
+    $("openaiModel").value = state.openaiModel;
+    $("apiBaseUrl").value = state.apiBaseUrl;
+
+    $("analyzeBtn").addEventListener("click", analyze);
+    $("analyzeAiBtn").addEventListener("click", analyzeSmart);
+    $("saveBtn").addEventListener("click", saveCurrent);
+    $("demoFill").addEventListener("click", demoFill);
+    $("addCompanyBtn").addEventListener("click", addCompany);
+    $("exportData").addEventListener("click", exportJson);
+    $("saveKeyBtn").addEventListener("click", saveKey);
+    $("refreshCompaniesBtn").addEventListener("click", () => {
+      refreshCompanySelects();
+      persist();
+      $("status").textContent = "Sociétés SharePoint rechargées";
+    });
+    $("clearAll").addEventListener("click", () => {
+      state.notes = [];
+      state.companies = [...DEFAULT_COMPANIES];
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(SETTINGS_KEY);
+      $("title").value = "";
+      $("note").value = "";
+      $("newCompany").value = "";
+      $("openaiKey").value = "";
+      $("apiBaseUrl").value = "";
+      $("summary").textContent = "Aucune note analysée pour le moment.";
+      $("questions").innerHTML = "";
+      $("themeChip").textContent = "Thème: -";
+      $("companyChip").textContent = "Société: -";
+      refreshCompanySelects();
+      renderNotes();
+      $("status").textContent = "Notes effacées";
+    });
+    $("filterTheme").addEventListener("change", renderNotes);
+    $("filterCompany").addEventListener("change", renderNotes);
+    $("newCompany").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") addCompany();
+    });
+
+    renderNotes();
+    demoFill();
+  </script>
+</body>
+</html>
