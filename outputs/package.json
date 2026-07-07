@@ -1,0 +1,10 @@
+{
+  "name": "nona-backend",
+  "private": true,
+  "version": "1.0.0",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "check": "node --check server.js"
+  }
+}
