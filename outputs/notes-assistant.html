@@ -402,7 +402,7 @@
     }
     .filter-grid{
       display:grid;
-      grid-template-columns:1.2fr .8fr .8fr .8fr;
+      grid-template-columns:1.2fr .7fr .8fr .8fr .8fr;
       gap:14px;
     }
     @media (max-width: 900px){.filter-grid{grid-template-columns:1fr 1fr}}
@@ -505,6 +505,40 @@
       background:linear-gradient(180deg, #fdfdfd, #e6e6e6);
       border:1px solid #7f7f7f;
       box-shadow:inset 1px 1px 0 rgba(255,255,255,.95);
+    }
+    .notes .item.note-card-pro{
+      border-left:7px solid #b78b2f;
+    }
+    .notes .item.note-card-perso{
+      border:2px solid #2d2a55;
+      border-left:9px solid #ff6f61;
+      border-radius:8px;
+      background:linear-gradient(180deg, #fffef4, #ffeeb6);
+      box-shadow:4px 5px 0 rgba(45,42,85,.15), inset 0 0 0 2px rgba(255,255,255,.45);
+    }
+    .notes .item.note-card-perso .item-title strong{
+      color:#2d2a55;
+    }
+    .mode-badge{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-width:58px;
+      padding:5px 9px;
+      border:1px solid #b78b2f;
+      background:linear-gradient(180deg, #132b31, #0b1d22);
+      color:#fff4d4;
+      font-size:11px;
+      font-weight:900;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+    }
+    .mode-badge.perso{
+      border:2px solid #2d2a55;
+      border-radius:8px;
+      background:linear-gradient(180deg, #ffbf3f, #ff6f61);
+      color:#2d2a55;
+      box-shadow:2px 3px 0 rgba(45,42,85,.16);
     }
     .item .tag{
       color:#3a6ea5;
@@ -1503,6 +1537,14 @@
             <input class="search-input" id="searchNotes" placeholder="Titre, société, texte, responsable, montant..." />
           </div>
           <div class="field">
+            <label for="filterMode">Mode</label>
+            <select id="filterMode">
+              <option>Tous modes</option>
+              <option>Pro</option>
+              <option>Perso</option>
+            </select>
+          </div>
+          <div class="field">
             <label for="filterTheme">Filtrer par thème</label>
             <select id="filterTheme"></select>
           </div>
@@ -2405,17 +2447,19 @@
       const tf = $("filterTheme").value;
       const cf = $("filterCompany").value;
       const sf = $("filterStatus").value;
+      const mf = $("filterMode").value;
       const search = normalizeForMatch($("searchNotes").value || "");
       const filtered = state.notes
         .map((n, index) => ({ n: withNoteDefaults(n), index }))
         .filter(({ n }) =>
+          (mf === "Tous modes" || n.mode === mf) &&
           (tf === "Tous thèmes" || n.theme === tf) &&
           (cf === "Toutes sociétés" || n.company === cf) &&
           (sf === "Tous statuts" || n.status === sf) &&
           (!search || normalizeForMatch(noteSearchText(n)).includes(search))
         );
       $("notesList").innerHTML = filtered.length ? filtered.map(({ n, index }) => `
-        <div class="item">
+        <div class="item ${n.mode === "Perso" ? "note-card-perso" : "note-card-pro"}">
           <div class="item-title">
             <strong>${escapeHtml(n.title || "Note sans titre")}</strong>
             <div class="note-row-actions">
@@ -2426,6 +2470,7 @@
             </div>
           </div>
           <div class="chips">
+            <span class="mode-badge ${n.mode === "Perso" ? "perso" : "pro"}">${escapeHtml(n.mode)}</span>
             <span class="chip">${escapeHtml(n.company)}</span>
             <span class="chip">${escapeHtml(n.theme)}</span>
           </div>
@@ -2897,6 +2942,7 @@
       if (editBtn) editNoteByTarget(editBtn);
     });
     $("filterTheme").addEventListener("change", renderNotes);
+    $("filterMode").addEventListener("change", renderNotes);
     $("filterCompany").addEventListener("change", renderNotes);
     $("filterStatus").addEventListener("change", renderNotes);
     $("searchNotes").addEventListener("input", renderNotes);
