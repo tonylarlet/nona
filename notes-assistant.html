@@ -410,6 +410,32 @@
       grid-template-columns:1.2fr .7fr .8fr .8fr .8fr;
       gap:14px;
     }
+    .ai-search-panel{
+      margin:0 0 14px;
+      padding:12px;
+      border:1px solid rgba(183,139,47,.72);
+      background:linear-gradient(135deg, rgba(255,253,246,.78), rgba(236,221,178,.58));
+      box-shadow:inset 1px 1px 0 rgba(255,255,255,.72);
+    }
+    .ai-search-row{
+      display:grid;
+      grid-template-columns:minmax(0,1fr) 118px 96px;
+      gap:10px;
+      align-items:end;
+    }
+    .ai-search-result{
+      display:none;
+      margin-top:10px;
+      padding:9px 10px;
+      border:1px solid rgba(183,139,47,.55);
+      background:rgba(255,255,255,.48);
+      color:#564724;
+      font-size:13px;
+      line-height:1.45;
+      font-weight:800;
+    }
+    .ai-search-result.active{display:block}
+    @media (max-width: 760px){.ai-search-row{grid-template-columns:1fr}}
     @media (max-width: 900px){.filter-grid{grid-template-columns:1fr 1fr}}
     @media (max-width: 620px){.filter-grid{grid-template-columns:1fr}}
     .search-input{
@@ -1565,6 +1591,17 @@
         <div class="tiny">Filtre par thème ou société directement ci-dessous</div>
       </div>
       <div class="card-body">
+        <div class="ai-search-panel">
+          <div class="ai-search-row">
+            <div class="field" style="margin-bottom:0">
+              <label for="aiSearchNotes">Recherche IA</label>
+              <input class="search-input" id="aiSearchNotes" placeholder="Ex. notes SCI avec montant, échéance proche, pas terminées..." />
+            </div>
+            <button class="btn secondary" id="aiSearchBtn" type="button">Chercher</button>
+            <button class="btn ghost" id="clearAiSearchBtn" type="button">Effacer</button>
+          </div>
+          <div class="ai-search-result" id="aiSearchResult"></div>
+        </div>
         <div class="filter-grid">
           <div class="field">
             <label for="searchNotes">Rechercher</label>
@@ -2574,13 +2611,116 @@
       showToast("Nouvelle note");
     }
 
+    function parseAiSearchIntent(query) {
+      const q = normalizeForMatch(query);
+      const words = q.split(/\s+/).filter(word => word.length >= 3);
+      const mode = /\b(perso|personnel|maison|famille|vacances|medecin)\b/.test(q) ? "Perso"
+        : /\b(pro|societe|sci|rh|daf|juridique|compta|commercial)\b/.test(q) ? "Pro"
+        : "";
+      const status = /\b(termine|clos|cloture|fini)\b/.test(q) && !/\b(non|pas|ouvert)\b/.test(q) ? "Terminé"
+        : /\b(attente|reponse|retour)\b/.test(q) ? "En attente"
+        : /\b(ouvert|non termine|pas termine|a traiter|traiter|todo)\b/.test(q) ? "ouvert"
+        : "";
+      const risk = /\b(critique|urgent|urgence)\b/.test(q) ? "Critique"
+        : /\b(risque|fort|alerte|surveiller)\b/.test(q) ? "risque"
+        : "";
+      const needsAmount = /\b(montant|budget|devis|facture|paiement|xpf|eur|millions?)\b/.test(q);
+      const nearDue = /\b(echeance|deadline|retard|retarde|proche|bientot|j 10|alerte)\b/.test(q);
+      const noOwner = /\b(sans responsable|pas responsable|responsable manquant)\b/.test(q);
+      const company = bestCompanyMatch(query) || detectCompany(query);
+      const theme = themes.find(theme => theme !== "Tous thèmes" && q.includes(normalizeForMatch(theme))) || "";
+      const noteType = ["Relance", "Décision", "Montant", "Réunion", "Risque", "Dossier", "Rendez-vous", "Achat", "Maison", "Perso"]
+        .find(type => q.includes(normalizeForMatch(type))) || "";
+      return { q, words, mode, status, risk, needsAmount, nearDue, noOwner, company, theme, noteType };
+    }
+
+    function scoreAiSearchNote(note, intent) {
+      const text = normalizeForMatch(noteSearchText(note));
+      let score = 0;
+      const reasons = [];
+      for (const word of intent.words) {
+        if (text.includes(word)) score += 3;
+      }
+      if (intent.mode && note.mode === intent.mode) {
+        score += 18;
+        reasons.push(intent.mode);
+      }
+      if (intent.company && note.company === intent.company) {
+        score += 22;
+        reasons.push(note.company);
+      }
+      if (intent.theme && note.theme === intent.theme) {
+        score += 16;
+        reasons.push(note.theme);
+      }
+      if (intent.noteType && note.noteType === intent.noteType) {
+        score += 16;
+        reasons.push(note.noteType);
+      }
+      if (intent.status === "ouvert" && note.status !== "Terminé") {
+        score += 14;
+        reasons.push("non clôturée");
+      } else if (intent.status && note.status === intent.status) {
+        score += 14;
+        reasons.push(note.status);
+      }
+      if (intent.risk === "risque" && ["À surveiller", "Fort", "Critique"].includes(note.risk)) {
+        score += 14;
+        reasons.push(`risque ${note.risk}`);
+      } else if (intent.risk && note.risk === intent.risk) {
+        score += 18;
+        reasons.push(note.risk);
+      }
+      if (intent.needsAmount && note.amount) {
+        score += 12;
+        reasons.push("montant");
+      }
+      if (intent.nearDue && isAlertDue(note)) {
+        score += 16;
+        reasons.push(alertLabel(note));
+      }
+      if (intent.noOwner && !note.owner) {
+        score += 12;
+        reasons.push("sans responsable");
+      }
+      if (!intent.words.length) score = 0;
+      return { score, reasons: [...new Set(reasons)].slice(0, 3) };
+    }
+
+    function getAiSearchResults(notes) {
+      const query = $("aiSearchNotes").value.trim();
+      if (!query) return { query: "", matches: notes.map(item => ({ ...item, aiScore: 0, aiReasons: [] })) };
+      const intent = parseAiSearchIntent(query);
+      const matches = notes
+        .map(item => {
+          const result = scoreAiSearchNote(item.n, intent);
+          return { ...item, aiScore: result.score, aiReasons: result.reasons };
+        })
+        .filter(item => item.aiScore > 0)
+        .sort((a, b) => b.aiScore - a.aiScore);
+      return { query, matches };
+    }
+
+    function updateAiSearchSummary(query, count) {
+      const box = $("aiSearchResult");
+      if (!query) {
+        box.classList.remove("active");
+        box.textContent = "";
+        return;
+      }
+      box.classList.add("active");
+      box.textContent = count
+        ? `${count} note(s) trouvée(s) par recherche IA locale. Les plus pertinentes sont affichées en premier.`
+        : "Aucune note assez proche. Essaie avec société, thème, montant, échéance, risque ou responsable.";
+    }
+
     function renderNotes() {
       const tf = $("filterTheme").value;
       const cf = $("filterCompany").value;
       const sf = $("filterStatus").value;
       const mf = $("filterMode").value;
       const search = normalizeForMatch($("searchNotes").value || "");
-      const filtered = state.notes
+      const baseFiltered = state.notes
         .map((n, index) => ({ n: withNoteDefaults(n), index }))
         .filter(({ n }) =>
           (mf === "Tous modes" || n.mode === mf) &&
@@ -2589,7 +2729,10 @@
           (sf === "Tous statuts" || n.status === sf) &&
           (!search || normalizeForMatch(noteSearchText(n)).includes(search))
         );
-      $("notesList").innerHTML = filtered.length ? filtered.map(({ n, index }) => `
+      const aiResults = getAiSearchResults(baseFiltered);
+      const filtered = aiResults.query ? aiResults.matches : aiResults.matches;
+      updateAiSearchSummary(aiResults.query, filtered.length);
+      $("notesList").innerHTML = filtered.length ? filtered.map(({ n, index, aiReasons }) => `
         <div class="item ${n.mode === "Perso" ? "note-card-perso" : "note-card-pro"}">
           <div class="item-title">
             <strong>${escapeHtml(n.title || "Note sans titre")}</strong>
@@ -2614,6 +2757,7 @@
             ${n.amount ? `<span class="chip">Montant: ${escapeHtml(n.amount)}</span>` : ""}
             ${n.noteType ? `<span class="chip">Type: ${escapeHtml(n.noteType)}</span>` : ""}
             ${n.nextAction ? `<span class="chip action-chip">Action: ${escapeHtml(n.nextAction)}</span>` : ""}
+            ${aiResults.query && aiReasons?.length ? `<span class="chip action-chip">Pourquoi: ${escapeHtml(aiReasons.join(", "))}</span>` : ""}
           </div>
           <div style="margin-top:10px" class="muted">${escapeHtml(n.note)}</div>
         </div>
@@ -3080,6 +3224,18 @@
     $("filterCompany").addEventListener("change", renderNotes);
     $("filterStatus").addEventListener("change", renderNotes);
     $("searchNotes").addEventListener("input", renderNotes);
+    $("aiSearchBtn").addEventListener("click", renderNotes);
+    $("clearAiSearchBtn").addEventListener("click", () => {
+      $("aiSearchNotes").value = "";
+      renderNotes();
+    });
+    $("aiSearchNotes").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") renderNotes();
+      if (e.key === "Escape") {
+        $("aiSearchNotes").value = "";
+        renderNotes();
+      }
+    });
     $("newCompany").addEventListener("keydown", (e) => {
       if (e.key === "Enter") addCompany();
     });
