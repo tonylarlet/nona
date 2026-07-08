@@ -246,6 +246,11 @@
       font-weight:900;
       box-shadow:inset 1px 1px 0 rgba(255,255,255,.95);
     }
+    .action-chip{
+      background:linear-gradient(180deg, #fff8df, #dfc06b);
+      border-color:#b78b2f;
+      font-weight:800;
+    }
     .theme-banner{
       margin:0 0 14px;
       padding:14px 16px;
@@ -430,6 +435,22 @@
       margin-bottom:14px;
       background:linear-gradient(180deg, #f8f8f8, #e7e7e7);
       box-shadow:inset 1px 1px 0 rgba(255,255,255,.88);
+    }
+    .quick-capture{
+      border-color:#d7b35f;
+      background:
+        linear-gradient(135deg, rgba(255,253,246,.9), rgba(238,222,178,.7));
+    }
+    .quick-row{
+      display:grid;
+      grid-template-columns:minmax(0,1fr) 132px;
+      gap:10px;
+      align-items:stretch;
+    }
+    .quick-row .btn{
+      min-height:48px;
+      letter-spacing:.06em;
+      text-transform:uppercase;
     }
     .form-zone-title{
       display:flex;
@@ -688,6 +709,9 @@
       .form-zone{
         padding:10px;
         margin-bottom:10px;
+      }
+      .quick-row{
+        grid-template-columns:1fr;
       }
       .form-zone-title{
         align-items:flex-start;
@@ -1362,6 +1386,16 @@
             </div>
             <div class="tiny" id="themeBannerHint">L’analyse n’a pas encore été lancée.</div>
           </div>
+          <div class="form-zone quick-capture">
+            <div class="form-zone-title">
+              <span>Note éclair</span>
+              <span>une phrase, Nona classe</span>
+            </div>
+            <div class="quick-row">
+              <input id="quickNote" placeholder="Ex. SCI Yahoué vente dock 185Ms, relancer notaire avant fin août..." />
+              <button class="btn secondary" id="quickCaptureBtn" type="button">Classer</button>
+            </div>
+          </div>
           <div class="form-zone">
             <div class="form-zone-title">
               <span>Identification</span>
@@ -1795,17 +1829,20 @@
         $("company").value = PERSONAL_COMPANY;
         $("title").placeholder = "Ex. rendez-vous médecin, idée vacances, maison, famille...";
         $("note").placeholder = "Écris ici une note perso, une idée, une tâche ou un rappel...";
+        $("quickNote").placeholder = "Ex. Perso rdv médecin jeudi, penser aux documents...";
         updateThemeUI("Perso", "Mode personnel");
         $("companyChip").textContent = "Société: Perso";
       } else if ($("company").value === PERSONAL_COMPANY) {
         $("company").value = "Toutes sociétés";
         $("title").placeholder = "Ex. réunion assurance, litige fournisseur, point trésorerie...";
         $("note").placeholder = "Écris ici ta note de réunion, ton idée ou ton sujet...";
+        $("quickNote").placeholder = "Ex. SCI Yahoué vente dock 185Ms, relancer notaire avant fin août...";
         updateThemeUI("Auto", "Mode professionnel");
         $("companyChip").textContent = "Société: -";
       } else {
         $("title").placeholder = "Ex. réunion assurance, litige fournisseur, point trésorerie...";
         $("note").placeholder = "Écris ici ta note de réunion, ton idée ou ton sujet...";
+        $("quickNote").placeholder = "Ex. SCI Yahoué vente dock 185Ms, relancer notaire avant fin août...";
       }
     }
 
@@ -2008,6 +2045,85 @@
       }
       if (!candidates.length) return "";
       return formatFullNumber(Math.max(...candidates));
+    }
+
+    function detectNoteType(text, theme = "") {
+      const lower = normalizeForMatch(`${theme} ${text}`);
+      if (theme === "Perso" || isPersonalMode()) {
+        if (/\b(rdv|rendez|medecin|dentiste|ecole)\b/.test(lower)) return "Rendez-vous";
+        if (/\b(acheter|course|commande|cadeau)\b/.test(lower)) return "Achat";
+        if (/\b(maison|travaux|bricolage|jardin)\b/.test(lower)) return "Maison";
+        if (/\b(idee|envie|vacances|weekend)\b/.test(lower)) return "Idée perso";
+        return "Perso";
+      }
+      if (/\b(relance|relancer|attente|reponse|retour|suivre)\b/.test(lower)) return "Relance";
+      if (/\b(valider|validation|decision|decider|arbitrage|accord)\b/.test(lower)) return "Décision";
+      if (/\b(facture|paiement|reglement|montant|budget|devis|185|xpf|eur)\b/.test(lower)) return "Montant";
+      if (/\b(reunion|rdv|point|comite|copil)\b/.test(lower)) return "Réunion";
+      if (/\b(litige|risque|urgence|urgent|avocat|contentieux|alerte)\b/.test(lower)) return "Risque";
+      if (/\b(document|piece|dossier|pv|contrat|bail|permis)\b/.test(lower)) return "Dossier";
+      return "Action";
+    }
+
+    function suggestOwner(text, theme = "", mode = state.noteMode) {
+      const lower = normalizeForMatch(`${theme} ${text}`);
+      if (mode === "Perso" || theme === "Perso") return "moi";
+      if (/\b(paies|salaire|rh|contrat travail|recrutement|conge)\b/.test(lower)) return "RH";
+      if (/\b(facture|paiement|reglement|tresorerie|compta|banque)\b/.test(lower)) return "compta";
+      if (/\b(avocat|juridique|pv|statuts|contentieux|contrat|bail)\b/.test(lower)) return "juridique";
+      if (/\b(travaux|permis|architecte|chantier|amenagement|dock)\b/.test(lower)) return "projets";
+      if (/\b(assurance|sinistre|courtier)\b/.test(lower)) return "assurance";
+      return "";
+    }
+
+    function suggestNextAction(text, noteType, theme = "", mode = state.noteMode) {
+      const lower = normalizeForMatch(`${theme} ${text}`);
+      if (mode === "Perso" || theme === "Perso") {
+        if (noteType === "Rendez-vous") return "confirmer le rendez-vous";
+        if (noteType === "Achat") return "noter l'achat à faire";
+        if (noteType === "Maison") return "planifier la prochaine étape maison";
+        return "faire la prochaine action perso";
+      }
+      if (noteType === "Relance") return "relancer l'interlocuteur";
+      if (noteType === "Décision") return "préparer l'arbitrage";
+      if (noteType === "Montant") return "vérifier le montant et l'échéance";
+      if (noteType === "Réunion") return "sortir les décisions du point";
+      if (noteType === "Risque") return "sécuriser le risque";
+      if (noteType === "Dossier") return "rassembler les pièces du dossier";
+      if (/\b(mail|email|courriel)\b/.test(lower)) return "préparer une réponse mail";
+      return "définir la prochaine action";
+    }
+
+    function getEnrichedFields(title, note, theme, company) {
+      const text = `${title} ${note} ${company}`;
+      const mode = theme === "Perso" || company === PERSONAL_COMPANY ? "Perso" : state.noteMode;
+      const noteType = detectNoteType(text, theme);
+      const suggestedOwner = suggestOwner(text, theme, mode);
+      const nextAction = suggestNextAction(text, noteType, theme, mode);
+      return { noteType, nextAction, suggestedOwner };
+    }
+
+    function looksPersonal(text) {
+      const lower = normalizeForMatch(text);
+      return /\b(perso|personnel|maison|famille|enfant|medecin|dentiste|vacances|weekend|courses)\b/.test(lower);
+    }
+
+    function applyQuickCapture() {
+      const raw = $("quickNote").value.trim();
+      if (!raw) {
+        showToast("Note éclair vide");
+        return;
+      }
+      if (looksPersonal(raw)) setNoteMode("Perso");
+      const current = $("note").value.trim();
+      $("note").value = current ? `${current}\n${raw}` : raw;
+      if (!$("title").value.trim()) $("title").value = buildAutoTitle(raw, detectTheme(raw), $("company").value, raw);
+      updateCompanySuggestion();
+      updateAmountSuggestion();
+      analyze();
+      $("quickNote").value = "";
+      $("status").textContent = "Note éclair classée";
+      showToast("Note éclair classée");
     }
 
     function updateAmountSuggestion() {
@@ -2274,14 +2390,19 @@
     }
 
     function withNoteDefaults(note) {
+      const mode = note.mode || (note.theme === "Perso" || note.company === PERSONAL_COMPANY ? "Perso" : "Pro");
+      const enriched = getEnrichedFields(note.title || "", note.note || "", note.theme || "", note.company || "");
       return {
         ...note,
-        mode: note.mode || (note.theme === "Perso" || note.company === PERSONAL_COMPANY ? "Perso" : "Pro"),
+        mode,
         status: note.status || "À traiter",
         risk: note.risk || "Normal",
         dueDate: note.dueDate || datePlusDays(30),
         owner: note.owner || "",
         amount: note.amount || "",
+        noteType: note.noteType || enriched.noteType,
+        nextAction: note.nextAction || enriched.nextAction,
+        suggestedOwner: note.suggestedOwner || note.owner || enriched.suggestedOwner,
         updatedAt: note.updatedAt || ""
       };
     }
@@ -2296,6 +2417,9 @@
         note.status,
         note.risk,
         note.owner,
+        note.noteType,
+        note.nextAction,
+        note.suggestedOwner,
         note.amount,
         note.dueDate,
         note.aiSummary,
@@ -2322,6 +2446,8 @@
       const finalCompany = isPersonalMode() ? PERSONAL_COMPANY : detectedCompany || company;
       const finalTitle = title || buildAutoTitle(text, finalTheme, finalCompany, combined);
       const existing = Number.isInteger(state.editingIndex) ? state.notes[state.editingIndex] : null;
+      const enriched = getEnrichedFields(finalTitle, combined, finalTheme, finalCompany);
+      if (!$("ownerField").value.trim() && enriched.suggestedOwner) $("ownerField").value = enriched.suggestedOwner;
 
       state.current = {
         id: existing?.id || crypto.randomUUID?.() || String(Date.now()),
@@ -2331,6 +2457,7 @@
         theme: finalTheme,
         createdAt: existing?.createdAt || new Date().toLocaleString("fr-FR"),
         updatedAt: existing ? new Date().toLocaleString("fr-FR") : "",
+        ...enriched,
         ...getBusinessFields()
       };
 
@@ -2365,17 +2492,21 @@
         const finalTitle = title || buildAutoTitle(text, finalTheme, finalCompany, summary);
         const questions = Array.isArray(ai.questions) && ai.questions.length ? ai.questions : suggestQuestions(finalTheme, text);
         const existing = Number.isInteger(state.editingIndex) ? state.notes[state.editingIndex] : null;
+        const savedNoteText = title ? `${title}\n\n${note}` : note;
+        const enriched = getEnrichedFields(finalTitle, `${savedNoteText} ${summary}`, finalTheme, finalCompany);
+        if (!$("ownerField").value.trim() && enriched.suggestedOwner) $("ownerField").value = enriched.suggestedOwner;
 
         state.current = {
           id: existing?.id || crypto.randomUUID?.() || String(Date.now()),
           title: finalTitle,
-          note: title ? `${title}\n\n${note}` : note,
+          note: savedNoteText,
           company: finalCompany,
           theme: finalTheme,
           createdAt: existing?.createdAt || new Date().toLocaleString("fr-FR"),
           updatedAt: existing ? new Date().toLocaleString("fr-FR") : "",
           aiSummary: summary,
           aiQuestions: questions,
+          ...enriched,
           ...getBusinessFields()
         };
 
@@ -2481,6 +2612,8 @@
             ${n.dueDate ? `<span class="chip">Échéance: ${escapeHtml(formatDate(n.dueDate))}</span>` : ""}
             ${n.owner ? `<span class="chip">Resp.: ${escapeHtml(n.owner)}</span>` : ""}
             ${n.amount ? `<span class="chip">Montant: ${escapeHtml(n.amount)}</span>` : ""}
+            ${n.noteType ? `<span class="chip">Type: ${escapeHtml(n.noteType)}</span>` : ""}
+            ${n.nextAction ? `<span class="chip action-chip">Action: ${escapeHtml(n.nextAction)}</span>` : ""}
           </div>
           <div style="margin-top:10px" class="muted">${escapeHtml(n.note)}</div>
         </div>
@@ -2918,6 +3051,7 @@
     $("saveBtn").addEventListener("click", saveCurrent);
     $("newNoteBtn").addEventListener("click", newNote);
     $("dictateBtn").addEventListener("click", startDictation);
+    $("quickCaptureBtn").addEventListener("click", applyQuickCapture);
     $("proModeBtn").addEventListener("click", () => setNoteMode("Pro"));
     $("persoModeBtn").addEventListener("click", () => setNoteMode("Perso"));
     $("addCompanyBtn").addEventListener("click", addCompany);
@@ -2948,6 +3082,9 @@
     $("searchNotes").addEventListener("input", renderNotes);
     $("newCompany").addEventListener("keydown", (e) => {
       if (e.key === "Enter") addCompany();
+    });
+    $("quickNote").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") applyQuickCapture();
     });
     $("title").addEventListener("input", updateCompanySuggestion);
     $("note").addEventListener("input", updateCompanySuggestion);
