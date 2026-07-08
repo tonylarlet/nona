@@ -1089,10 +1089,6 @@
               <label for="note">Note</label>
               <textarea id="note" placeholder="Écris ici ta note de réunion, ton idée ou ton sujet..."></textarea>
             </div>
-            <div class="field">
-              <label for="amountField">Montant</label>
-              <input id="amountField" placeholder="Ex. 2 500 000 XPF" />
-            </div>
           </div>
 
           <details class="form-zone follow-up-panel">
@@ -1126,6 +1122,10 @@
                 <label for="ownerField">Responsable</label>
                 <input id="ownerField" placeholder="Ex. moi, compta, RH..." />
               </div>
+              <div class="field">
+                <label for="amountField">Montant</label>
+                <input id="amountField" placeholder="Ex. 2 500 000 XPF" />
+              </div>
             </div>
           </details>
           <div class="note-toolbar">
@@ -1133,10 +1133,6 @@
             <button class="btn voice" id="dictateBtn" title="Dicter la note">🎙</button>
             <button class="btn analyze" id="analyzeAiBtn" title="Analyse via OpenAI">Analyse IA</button>
             <button class="btn secondary save-wide" id="saveBtn">Enregistrer</button>
-          </div>
-          <div class="note-actions maintenance-actions">
-            <button class="btn ghost" id="refreshCompaniesBtn">Rafraîchir sociétés SharePoint</button>
-            <button class="btn ghost" id="enableAlertsBtn">Activer notifications échéances</button>
           </div>
           <details class="advanced">
             <summary>Paramètres avancés</summary>
@@ -1166,6 +1162,8 @@
               <div class="note-actions">
                 <button class="btn" id="saveKeyBtn">Sauver les paramètres</button>
                 <button class="btn" id="backendStatusBtn">Tester backend mails</button>
+                <button class="btn ghost" id="refreshCompaniesBtn">Rafraîchir sociétés SharePoint</button>
+                <button class="btn ghost" id="enableAlertsBtn">Activer notifications échéances</button>
               </div>
               <div class="meta">
                 <div class="field">
