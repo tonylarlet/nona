@@ -1112,26 +1112,11 @@
     </header>
 
     <nav class="mobile-tabs" aria-label="Navigation rapide">
-      <a href="#alertsSection">Alertes</a>
       <a href="#noteSection">Note</a>
+      <a href="#alertsSection">Alertes</a>
       <a href="#aiSection">IA</a>
       <a href="#notesSection">Notes</a>
     </nav>
-
-    <section class="card tech alert-board" id="alertsSection">
-      <div class="card-head">
-        <h2>Alertes</h2>
-        <div class="alert-actions">
-          <button class="btn" id="monthlyMailBtn">Mail mensuel notes ouvertes</button>
-          <button class="btn ghost" id="backendAlertsBtn">Relances backend J-10</button>
-          <button class="btn ghost" id="enableAlertsTopBtn">Activer notifications</button>
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="alert-summary" id="alertSummary"></div>
-        <div class="alert-list" id="alertList"></div>
-      </div>
-    </section>
 
     <div class="board">
       <section class="card tech" id="noteSection">
@@ -1289,6 +1274,21 @@
         </div>
       </section>
     </div>
+
+    <section class="card tech alert-board" id="alertsSection">
+      <div class="card-head">
+        <h2>Alertes</h2>
+        <div class="alert-actions">
+          <button class="btn" id="monthlyMailBtn">Mail mensuel notes ouvertes</button>
+          <button class="btn ghost" id="backendAlertsBtn">Relances backend J-10</button>
+          <button class="btn ghost" id="enableAlertsTopBtn">Activer notifications</button>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="alert-summary" id="alertSummary"></div>
+        <div class="alert-list" id="alertList"></div>
+      </div>
+    </section>
 
     <div class="section-gap"></div>
 
