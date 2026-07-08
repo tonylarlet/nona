@@ -1001,6 +1001,175 @@
       100%{transform:scale(1)}
     }
 
+    /* Personal mode: 90s animated notebook */
+    body.perso-mode{
+      --panel:#fff8d8;
+      --panel-2:#ffe7a8;
+      --text:#23203a;
+      --muted:#6e5f8c;
+      --accent:#4b7bec;
+      --accent-2:#ffbf3f;
+      --accent-3:#ff6f61;
+      --accent-4:#42b883;
+      --line:#2d2a55;
+      font-family:"Trebuchet MS", "Segoe UI", Arial, sans-serif;
+      background:
+        linear-gradient(90deg, rgba(255,255,255,.22) 1px, transparent 1px),
+        linear-gradient(180deg, #78c7ff 0%, #b9e8ff 45%, #fff4b8 100%);
+      background-size:30px 30px, auto;
+    }
+    body.perso-mode::before{
+      background:
+        repeating-linear-gradient(-12deg, rgba(255,255,255,.18) 0 8px, transparent 8px 28px),
+        radial-gradient(circle at 18% 18%, rgba(255,245,132,.35), transparent 16%),
+        radial-gradient(circle at 86% 12%, rgba(255,111,97,.22), transparent 14%);
+      opacity:.62;
+    }
+    body.perso-mode .hero{
+      border-bottom:3px solid #2d2a55;
+    }
+    body.perso-mode .hero h1{
+      color:#fff8d8;
+      letter-spacing:.05em;
+      text-shadow:
+        2px 2px 0 #2d2a55,
+        -1px 1px 0 #2d2a55,
+        0 7px 0 rgba(45,42,85,.18);
+    }
+    body.perso-mode .hero h1::after{
+      height:6px;
+      width:118px;
+      border:2px solid #2d2a55;
+      background:linear-gradient(90deg, #ff6f61, #ffbf3f, #42b883, #4b7bec);
+      box-shadow:3px 3px 0 rgba(45,42,85,.22);
+    }
+    body.perso-mode .card{
+      border:3px solid #2d2a55;
+      border-radius:8px;
+      background:linear-gradient(180deg, #fffbe8, #ffeeb6);
+      box-shadow:6px 8px 0 rgba(45,42,85,.2), inset 0 0 0 3px rgba(255,255,255,.58);
+    }
+    body.perso-mode .card::after{
+      background:
+        linear-gradient(135deg, transparent 0 48%, rgba(255,191,63,.18) 48% 52%, transparent 52%),
+        linear-gradient(180deg, rgba(255,255,255,.32), transparent 42%);
+    }
+    body.perso-mode .card.tech,
+    body.perso-mode .card.tech .card-body{
+      background:linear-gradient(180deg, #fffbe8, #ffeeb6);
+    }
+    body.perso-mode .card-head,
+    body.perso-mode .card.tech .card-head{
+      color:#fffbe8;
+      border-bottom:3px solid #2d2a55;
+      background:linear-gradient(90deg, #6c5ce7, #4b7bec 45%, #ff6f61);
+    }
+    body.perso-mode .card h2{
+      font-family:"Trebuchet MS", "Segoe UI", Arial, sans-serif;
+      letter-spacing:.05em;
+      text-shadow:2px 2px 0 rgba(45,42,85,.5);
+    }
+    body.perso-mode label,
+    body.perso-mode .form-zone-title,
+    body.perso-mode .tag{
+      color:#2d2a55;
+      letter-spacing:.08em;
+    }
+    body.perso-mode input,
+    body.perso-mode select,
+    body.perso-mode textarea{
+      border:2px solid #2d2a55;
+      border-radius:8px;
+      background:linear-gradient(180deg, #fffef4, #fff6c8);
+      box-shadow:3px 3px 0 rgba(45,42,85,.14);
+    }
+    body.perso-mode input:focus,
+    body.perso-mode select:focus,
+    body.perso-mode textarea:focus{
+      border-color:#ff6f61;
+      box-shadow:0 0 0 4px rgba(255,191,63,.34), 3px 3px 0 rgba(45,42,85,.14);
+    }
+    body.perso-mode .form-zone,
+    body.perso-mode details.advanced{
+      border:2px solid #2d2a55;
+      border-radius:8px;
+      background:rgba(255,255,245,.72);
+      box-shadow:4px 5px 0 rgba(45,42,85,.16);
+    }
+    body.perso-mode .theme-banner{
+      border:3px solid #2d2a55;
+      border-radius:8px;
+      background:linear-gradient(90deg, #ffbf3f, #ff6f61);
+      color:#2d2a55;
+      box-shadow:4px 5px 0 rgba(45,42,85,.18);
+    }
+    body.perso-mode .theme-banner .label,
+    body.perso-mode .theme-banner .hint,
+    body.perso-mode .theme-banner .value{
+      color:#2d2a55;
+    }
+    body.perso-mode .btn,
+    body.perso-mode .pill,
+    body.perso-mode .chip{
+      border:2px solid #2d2a55;
+      border-radius:8px;
+      background:linear-gradient(180deg, #fffbe8, #ffd45c);
+      color:#2d2a55;
+      box-shadow:3px 4px 0 rgba(45,42,85,.2);
+      text-shadow:none;
+    }
+    body.perso-mode .btn.secondary,
+    body.perso-mode .btn.newnote,
+    body.perso-mode .note-toolbar .btn.analyze,
+    body.perso-mode .note-toolbar .btn.save-wide,
+    body.perso-mode .note-actions .btn.save-wide,
+    body.perso-mode .mode-toggle .btn.active{
+      background:linear-gradient(180deg, #4b7bec, #6c5ce7);
+      color:#fffbe8;
+      border-color:#2d2a55;
+    }
+    body.perso-mode .note-toolbar .btn.promo{
+      background:linear-gradient(180deg, #ffbf3f, #ff8f3f);
+      color:#2d2a55;
+      border-color:#2d2a55;
+    }
+    body.perso-mode .mode-toggle .btn.perso.active{
+      background:linear-gradient(180deg, #ff6f61, #b84b9f);
+      color:#fffbe8;
+    }
+    body.perso-mode .item,
+    body.perso-mode .alert-kpi{
+      border:2px solid #2d2a55;
+      border-radius:8px;
+      background:linear-gradient(180deg, #fffef4, #ffeeb6);
+      box-shadow:3px 4px 0 rgba(45,42,85,.14);
+    }
+    body.perso-mode .mobile-tabs{
+      border:2px solid #2d2a55;
+      border-radius:8px;
+      background:#fff8d8;
+    }
+    body.perso-mode .mobile-tabs a{
+      border:2px solid #2d2a55;
+      border-radius:8px;
+      background:linear-gradient(180deg, #fffef4, #ffd45c);
+      color:#2d2a55;
+    }
+    body.perso-mode .note-toolbar{
+      border:3px solid #2d2a55;
+      border-radius:8px;
+      background:rgba(255,248,216,.96);
+      box-shadow:0 10px 0 rgba(45,42,85,.16), 0 14px 34px rgba(45,42,85,.22);
+    }
+    body.perso-mode .toast,
+    body.perso-mode .save-stamp{
+      border:3px solid #2d2a55;
+      border-radius:8px;
+      background:#fff8d8;
+      color:#2d2a55;
+      box-shadow:5px 6px 0 rgba(45,42,85,.22);
+    }
+
     @media (max-width: 720px){
       body{
         background:
@@ -1116,6 +1285,12 @@
       }
       .notes .item:nth-child(n+4){
         display:none;
+      }
+      body.perso-mode{
+        background:
+          linear-gradient(90deg, rgba(255,255,255,.22) 1px, transparent 1px),
+          linear-gradient(180deg, #78c7ff 0%, #b9e8ff 52%, #fff4b8 100%);
+        background-size:26px 26px, auto;
       }
     }
   </style>
@@ -1567,6 +1742,7 @@
 
     function setNoteMode(mode) {
       state.noteMode = mode === "Perso" ? "Perso" : "Pro";
+      document.body.classList.toggle("perso-mode", isPersonalMode());
       $("proModeBtn").classList.toggle("active", !isPersonalMode());
       $("persoModeBtn").classList.toggle("active", isPersonalMode());
       if (isPersonalMode()) {
@@ -1575,12 +1751,19 @@
           refreshCompanySelects();
         }
         $("company").value = PERSONAL_COMPANY;
+        $("title").placeholder = "Ex. rendez-vous médecin, idée vacances, maison, famille...";
+        $("note").placeholder = "Écris ici une note perso, une idée, une tâche ou un rappel...";
         updateThemeUI("Perso", "Mode personnel");
         $("companyChip").textContent = "Société: Perso";
       } else if ($("company").value === PERSONAL_COMPANY) {
         $("company").value = "Toutes sociétés";
+        $("title").placeholder = "Ex. réunion assurance, litige fournisseur, point trésorerie...";
+        $("note").placeholder = "Écris ici ta note de réunion, ton idée ou ton sujet...";
         updateThemeUI("Auto", "Mode professionnel");
         $("companyChip").textContent = "Société: -";
+      } else {
+        $("title").placeholder = "Ex. réunion assurance, litige fournisseur, point trésorerie...";
+        $("note").placeholder = "Écris ici ta note de réunion, ton idée ou ton sujet...";
       }
     }
 
