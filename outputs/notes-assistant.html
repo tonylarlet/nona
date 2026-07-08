@@ -163,6 +163,26 @@
       box-shadow:inset 1px 1px 0 rgba(255,255,255,.4), 0 8px 18px rgba(0,0,0,.12);
     }
     .field{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+    .mode-toggle{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:8px;
+      margin:0 0 14px;
+    }
+    .mode-toggle .btn{
+      min-height:44px;
+      opacity:.72;
+    }
+    .mode-toggle .btn.active{
+      opacity:1;
+      background:linear-gradient(180deg, #17606b, #0d3239);
+      border-color:#d7b35f;
+      color:#fff4d4;
+      box-shadow:0 0 0 3px rgba(183,139,47,.2), inset 0 1px 0 rgba(255,255,255,.22);
+    }
+    .mode-toggle .btn.perso.active{
+      background:linear-gradient(180deg, #7c4b7e, #3d223f);
+    }
     label{font-size:13px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em}
     input,select,textarea{
       width:100%;
@@ -1138,6 +1158,10 @@
               <span>Identification</span>
               <span>société, titre, note</span>
             </div>
+            <div class="mode-toggle" aria-label="Type de note">
+              <button class="btn active" id="proModeBtn" type="button">Pro</button>
+              <button class="btn perso" id="persoModeBtn" type="button">Perso</button>
+            </div>
             <div class="meta">
               <div class="field">
                 <label for="company">Société</label>
@@ -1329,6 +1353,7 @@
   <script type="module">
     const companies = [
       "Toutes sociétés",
+      "Perso",
       "Société A",
       "Société B",
       "Société C",
@@ -1347,10 +1372,12 @@
       "Logistique",
       "Achats",
       "Immobilier",
-      "IT"
+      "IT",
+      "Perso"
     ];
 
     const themeRules = [
+      { theme: "Perso", words: ["perso", "personnel", "maison", "famille", "santé", "vacances", "sport", "médecin", "enfant", "école", "voiture", "assurance perso", "impôts perso", "banque perso"] },
       { theme: "Financier", words: ["trésorerie", "budget", "facture", "facturation", "encaissement", "paiement", "banque", "balance", "cash", "coût", "marge", "impôt", "taxe"] },
       { theme: "Légal", words: ["contrat", "juridique", "litige", "avocat", "clause", "bail", "contentieux", "réglementaire", "conformité", "droit"] },
       { theme: "RH", words: ["salarié", "contrat de travail", "paie", "recrutement", "entretien", "absence", "discipline", "formation", "direction du travail"] },
@@ -1423,6 +1450,13 @@
         "Qui intervient techniquement et sous quel délai maximal ?",
         "Existe-t-il une sauvegarde récente ou un retour arrière possible ?",
         "Quel impact opérationnel pour les magasins, la compta ou les bases MySQL ?"
+      ],
+      Perso: [
+        "Quelle est la prochaine action simple à faire, et quand ?",
+        "Est-ce une tâche à régler, une idée à garder ou une décision à prendre ?",
+        "Y a-t-il une date limite réelle à noter en échéance ?",
+        "Faut-il prévenir quelqu'un, prendre rendez-vous ou conserver un document ?",
+        "Quel petit pas permettrait de débloquer le sujet sans y passer la journée ?"
       ]
     };
 
@@ -1435,6 +1469,7 @@
         "BRICOPF1",
         "BRICOPF2",
         "BRM DIFFUSION",
+        "Perso",
         "CALEDOJOB",
         "CHILI",
         "DUTEX",
@@ -1507,7 +1542,8 @@
       openaiModel: "gpt-4.1-mini",
       apiBaseUrl: "",
       mailBackendUrl: "http://127.0.0.1:8798",
-      editingIndex: null
+      editingIndex: null,
+      noteMode: "Pro"
     };
 
     const $ = (id) => document.getElementById(id);
@@ -1515,12 +1551,41 @@
     const SETTINGS_KEY = "notes-assistant-settings-v1";
     const ALERT_KEY = "notes-assistant-alerts-v1";
     const DEFAULT_COMPANIES = [...state.companies];
+    const PERSONAL_COMPANY = "Perso";
 
     function fillSelect(select, items) {
       select.innerHTML = items.map(v => `<option value="${v}">${v}</option>`).join("");
     }
 
+    function ensureCoreCompanies() {
+      state.companies = [...new Set([PERSONAL_COMPANY, ...state.companies])];
+    }
+
+    function isPersonalMode() {
+      return state.noteMode === "Perso";
+    }
+
+    function setNoteMode(mode) {
+      state.noteMode = mode === "Perso" ? "Perso" : "Pro";
+      $("proModeBtn").classList.toggle("active", !isPersonalMode());
+      $("persoModeBtn").classList.toggle("active", isPersonalMode());
+      if (isPersonalMode()) {
+        if (!state.companies.includes(PERSONAL_COMPANY)) {
+          state.companies.unshift(PERSONAL_COMPANY);
+          refreshCompanySelects();
+        }
+        $("company").value = PERSONAL_COMPANY;
+        updateThemeUI("Perso", "Mode personnel");
+        $("companyChip").textContent = "Société: Perso";
+      } else if ($("company").value === PERSONAL_COMPANY) {
+        $("company").value = "Toutes sociétés";
+        updateThemeUI("Auto", "Mode professionnel");
+        $("companyChip").textContent = "Société: -";
+      }
+    }
+
     function detectTheme(text) {
+      if (isPersonalMode()) return "Perso";
       const normalized = text.toLowerCase();
       for (const rule of themeRules) {
         if (rule.words.some(word => normalized.includes(word))) return rule.theme;
@@ -1643,6 +1708,7 @@
     }
 
     function resolveCompanyFromInputs(title, note, fallback = "") {
+      if (isPersonalMode()) return PERSONAL_COMPANY;
       const noteMatch = bestCompanyMatch(note) || detectCompany(note);
       if (noteMatch) return noteMatch;
       const titleMatch = bestCompanyMatch(title) || detectCompany(title);
@@ -1732,6 +1798,18 @@
     }
 
     function suggestQuestions(theme, text) {
+      if (theme === "Perso" || isPersonalMode()) {
+        const lower = text.toLowerCase();
+        const extra = [
+          "Quelle est la prochaine action simple à faire, et quand ?",
+          "Est-ce une tâche à régler, une idée à garder ou une décision à prendre ?"
+        ];
+        if (lower.includes("rendez") || lower.includes("rdv") || lower.includes("médecin")) extra.push("Faut-il prendre, déplacer ou confirmer un rendez-vous ?");
+        if (lower.includes("maison") || lower.includes("travaux")) extra.push("Quelle action maison faut-il planifier et avec quel budget ?");
+        if (lower.includes("famille") || lower.includes("enfant")) extra.push("Qui faut-il prévenir ou relancer dans la famille ?");
+        if (lower.includes("impôt") || lower.includes("banque") || lower.includes("assurance")) extra.push("Quel document perso faut-il retrouver ou conserver ?");
+        return [...new Set([...extra, ...questionBank.Perso])].slice(0, 6);
+      }
       const base = questionBank[theme] || questionBank.Admin;
       const extra = [
         "Quelle est la prochaine action concrète, par qui, et avant quelle date ?",
@@ -1872,13 +1950,28 @@
     async function analyzeWithOpenAI(title, note) {
       if (!state.openaiKey) throw new Error("Clé OpenAI manquante");
       const companyList = state.companies.filter(company => company !== "Toutes sociétés").join(", ");
+      const modeLine = isPersonalMode()
+        ? "Tu es Nona, assistant personnel de prise de notes. La note concerne la vie perso de l'utilisateur. Retourne STRICTEMENT du JSON valide, sans markdown."
+        : "Tu es Nona, assistant de prise de notes pour un DAF d'un groupe commercial en Nouvelle-Calédonie et Polynésie française. Retourne STRICTEMENT du JSON valide, sans markdown.";
+      const themeLine = isPersonalMode()
+        ? "Règles: theme doit être Perso. company_hint doit être Perso."
+        : "Règles: theme doit être un seul mot parmi Admin, Financier, Légal, RH, Commercial, Logistique, Achats, Immobilier, IT, Stratégique, Vente, Perso, Autre.";
+      const summaryLine = isPersonalMode()
+        ? "summary doit être une synthèse courte et pratique: sujet, prochaine action, date éventuelle, document ou personne à relancer."
+        : "summary doit être une synthèse courte et opérationnelle: sujet, risque, décision attendue, prochaine action.";
+      const questionLine = isPersonalMode()
+        ? "questions doit contenir 4 à 6 questions utiles pour avancer dans la vie perso: prochaine action, date, document, rendez-vous, personne à prévenir, budget éventuel. Évite les questions professionnelles."
+        : "questions doit contenir 4 à 6 questions vraiment utiles pour un DAF. Chaque question doit aider à décider ou relancer: responsable, date limite, montant, risque, validation, document, arbitrage associés, mail à envoyer.";
+      const companyLine = isPersonalMode()
+        ? "company_hint doit être exactement Perso."
+        : "company_hint doit reprendre exactement une société de la liste connue si la note permet de l'identifier, y compris via acronyme, alias, faute mineure ou nom partiel. Sinon chaîne vide.";
       const prompt = [
-        "Tu es Nona, assistant de prise de notes pour un DAF d'un groupe commercial en Nouvelle-Calédonie et Polynésie française. Retourne STRICTEMENT du JSON valide, sans markdown.",
+        modeLine,
         "Schéma attendu: {\"theme\":\"...\",\"company_hint\":\"...\",\"summary\":\"...\",\"questions\":[\"...\",\"...\"]}",
-        "Règles: theme doit être un seul mot parmi Admin, Financier, Légal, RH, Commercial, Logistique, Achats, Immobilier, IT, Stratégique, Autre.",
-        "company_hint doit reprendre exactement une société de la liste connue si la note permet de l'identifier, y compris via acronyme, alias, faute mineure ou nom partiel. Sinon chaîne vide.",
-        "summary doit être une synthèse courte et opérationnelle: sujet, risque, décision attendue, prochaine action.",
-        "questions doit contenir 4 à 6 questions vraiment utiles pour un DAF. Chaque question doit aider à décider ou relancer: responsable, date limite, montant, risque, validation, document, arbitrage associés, mail à envoyer.",
+        themeLine,
+        companyLine,
+        summaryLine,
+        questionLine,
         "Évite les questions génériques. Préfère des questions fermées ou orientées action, par exemple: qui valide, quel montant, quelle pièce, quelle date, quel risque si on attend.",
         `Sociétés connues: ${companyList}`,
         "",
@@ -1946,6 +2039,7 @@
 
     function getBusinessFields() {
       return {
+        mode: state.noteMode,
         status: $("statusField").value || "À traiter",
         risk: $("riskField").value || "Normal",
         dueDate: $("dueDateField").value || datePlusDays(30),
@@ -1957,6 +2051,7 @@
     function withNoteDefaults(note) {
       return {
         ...note,
+        mode: note.mode || (note.theme === "Perso" || note.company === PERSONAL_COMPANY ? "Perso" : "Pro"),
         status: note.status || "À traiter",
         risk: note.risk || "Normal",
         dueDate: note.dueDate || datePlusDays(30),
@@ -1972,6 +2067,7 @@
         note.note,
         note.company,
         note.theme,
+        note.mode,
         note.status,
         note.risk,
         note.owner,
@@ -1998,7 +2094,7 @@
       const detectedCompany = resolveCompanyFromInputs(title, note, company);
       const finalTheme = detectedTheme;
       const combined = title ? `${title}\n\n${note}` : note;
-      const finalCompany = detectedCompany || company;
+      const finalCompany = isPersonalMode() ? PERSONAL_COMPANY : detectedCompany || company;
       const finalTitle = title || buildAutoTitle(text, finalTheme, finalCompany, combined);
       const existing = Number.isInteger(state.editingIndex) ? state.notes[state.editingIndex] : null;
 
@@ -2038,8 +2134,8 @@
         const aiCompany = ai.company_hint || "";
         const textCompany = resolveCompanyFromInputs(title, note, currentCompany);
         const normalizedAiCompany = aiCompany ? (bestCompanyMatch(aiCompany) || detectCompany(aiCompany) || aiCompany) : "";
-        const finalTheme = aiTheme || localTheme;
-        const finalCompany = normalizedAiCompany || textCompany || currentCompany;
+        const finalTheme = isPersonalMode() ? "Perso" : aiTheme || localTheme;
+        const finalCompany = isPersonalMode() ? PERSONAL_COMPANY : normalizedAiCompany || textCompany || currentCompany;
         const summary = ai.summary || (title ? `${title}\n\n${note}` : note);
         const finalTitle = title || buildAutoTitle(text, finalTheme, finalCompany, summary);
         const questions = Array.isArray(ai.questions) && ai.questions.length ? ai.questions : suggestQuestions(finalTheme, text);
@@ -2097,6 +2193,7 @@
 
     function clearCurrentDraft() {
       state.editingIndex = null;
+      setNoteMode("Pro");
       $("title").value = "";
       $("note").value = "";
       $("company").value = "Toutes sociétés";
@@ -2182,6 +2279,7 @@
       if (index < 0 || index >= state.notes.length) return;
       const note = withNoteDefaults(state.notes[index]);
       state.editingIndex = index;
+      setNoteMode(note.mode || "Pro");
       $("title").value = note.title || "";
       $("note").value = editableNoteText(note);
       $("company").value = state.companies.includes(note.company) ? note.company : "Toutes sociétés";
@@ -2479,6 +2577,7 @@
         const data = JSON.parse(raw);
         if (Array.isArray(data.notes)) state.notes = data.notes.map(withNoteDefaults);
         if (Array.isArray(data.companies) && data.companies.length) state.companies = data.companies;
+        ensureCoreCompanies();
       } catch {
         // ignore corrupted local data
       }
@@ -2496,6 +2595,7 @@
     }
 
     function refreshCompanySelects() {
+      ensureCoreCompanies();
       const merged = [...new Set([...state.companies])];
       state.companies = merged;
       const items = ["Toutes sociétés", ...merged];
@@ -2510,6 +2610,7 @@
         const data = await response.json();
         if (!Array.isArray(data.companies) || !data.companies.length) return false;
         state.companies = [...new Set(data.companies.filter(Boolean))];
+        ensureCoreCompanies();
         return true;
       } catch {
         return false;
@@ -2589,6 +2690,8 @@
     $("saveBtn").addEventListener("click", saveCurrent);
     $("newNoteBtn").addEventListener("click", newNote);
     $("dictateBtn").addEventListener("click", startDictation);
+    $("proModeBtn").addEventListener("click", () => setNoteMode("Pro"));
+    $("persoModeBtn").addEventListener("click", () => setNoteMode("Perso"));
     $("addCompanyBtn").addEventListener("click", addCompany);
     $("saveKeyBtn").addEventListener("click", saveKey);
     $("enableAlertsBtn").addEventListener("click", enableDeadlineNotifications);
