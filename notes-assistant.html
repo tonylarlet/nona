@@ -899,6 +899,87 @@
       border:1px solid #d7b35f;
       color:#fff4d4;
     }
+    .save-stamp{
+      position:fixed;
+      left:50%;
+      top:42%;
+      z-index:70;
+      transform:translate(-50%, -50%) scale(.72) rotate(-8deg);
+      padding:16px 24px;
+      border:3px solid #d7b35f;
+      color:#fff4d4;
+      background:rgba(16,31,36,.92);
+      font-family:Georgia, "Times New Roman", serif;
+      font-size:24px;
+      font-weight:900;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      opacity:0;
+      pointer-events:none;
+      box-shadow:0 18px 44px rgba(0,0,0,.34), inset 0 0 0 2px rgba(255,255,255,.18);
+    }
+    .save-stamp.show{animation:stampIn .9s ease both}
+    .theme-banner.resolved{animation:decoResolve .78s ease}
+    .follow-summary{
+      color:#6d6048;
+      text-transform:none;
+      letter-spacing:.02em;
+      font-weight:800;
+    }
+    .follow-up-panel[open]{animation:panelOpen .22s ease}
+    #noteSection.is-analyzing{animation:decoAnalyzeFrame 1.35s ease-in-out infinite}
+    #noteSection.is-analyzing .card-head{
+      background:linear-gradient(90deg, #0b1d22, #17606b, #0b1d22);
+      background-size:220% 100%;
+      animation:decoScan 1.4s linear infinite;
+    }
+    .note-toolbar .btn{position:relative;overflow:hidden}
+    #dictateBtn.is-listening{animation:micPulse 1s ease-in-out infinite}
+    #dictateBtn.is-listening::after{
+      content:"";
+      position:absolute;
+      inset:-5px;
+      border:1px solid rgba(215,179,95,.72);
+      animation:micRing 1s ease-out infinite;
+      pointer-events:none;
+    }
+    .btn.just-saved{animation:savedButton .55s ease}
+    @keyframes stampIn{
+      0%{opacity:0;transform:translate(-50%, -50%) scale(1.5) rotate(-14deg)}
+      35%{opacity:1;transform:translate(-50%, -50%) scale(.92) rotate(-8deg)}
+      72%{opacity:1;transform:translate(-50%, -50%) scale(1) rotate(-8deg)}
+      100%{opacity:0;transform:translate(-50%, -56%) scale(1.04) rotate(-8deg)}
+    }
+    @keyframes decoResolve{
+      0%{letter-spacing:.02em; filter:brightness(.9)}
+      45%{letter-spacing:.18em; filter:brightness(1.35)}
+      100%{letter-spacing:normal; filter:brightness(1)}
+    }
+    @keyframes panelOpen{
+      from{transform:translateY(-2px); opacity:.88}
+      to{transform:translateY(0); opacity:1}
+    }
+    @keyframes decoAnalyzeFrame{
+      0%,100%{box-shadow:0 16px 34px rgba(0,0,0,.24), inset 0 0 0 2px rgba(255,255,255,.42), inset 0 0 0 5px rgba(183,139,47,.16)}
+      50%{box-shadow:0 16px 34px rgba(0,0,0,.24), 0 0 0 4px rgba(215,179,95,.32), inset 0 0 0 2px rgba(255,255,255,.42), inset 0 0 0 5px rgba(183,139,47,.3)}
+    }
+    @keyframes decoScan{
+      0%{background-position:0% 50%}
+      100%{background-position:220% 50%}
+    }
+    @keyframes micPulse{
+      0%,100%{transform:translateY(0); filter:brightness(1)}
+      50%{transform:translateY(-1px); filter:brightness(1.3)}
+    }
+    @keyframes micRing{
+      0%{opacity:.8; transform:scale(.9)}
+      100%{opacity:0; transform:scale(1.25)}
+    }
+    @keyframes savedButton{
+      0%{transform:scale(1)}
+      45%{transform:scale(.97); filter:brightness(1.35)}
+      100%{transform:scale(1)}
+    }
 
     @media (max-width: 720px){
       body{
@@ -1021,6 +1102,7 @@
 </head>
 <body>
   <div class="toast" id="toast"></div>
+  <div class="save-stamp" id="saveStamp">Enregistré</div>
   <div class="wrap">
     <header class="hero">
       <div>
@@ -1094,7 +1176,7 @@
           <details class="form-zone follow-up-panel">
             <summary class="form-zone-title">
               <span>Suivi</span>
-              <span>échéance, risque, responsable</span>
+              <span class="follow-summary" id="followSummary">À traiter · Normal · J-30</span>
             </summary>
             <div class="business-grid">
               <div class="field">
@@ -1645,6 +1727,7 @@
       if (!field.value.trim() || field.dataset.autoAmount === field.value.trim()) {
         field.value = amount;
         field.dataset.autoAmount = amount;
+        updateFollowSummary();
       }
     }
 
@@ -1721,6 +1804,36 @@
       showToast._timer = setTimeout(() => toast.classList.remove("show"), 1600);
     }
 
+    function pulseClass(element, className, duration = 700) {
+      if (!element) return;
+      element.classList.remove(className);
+      void element.offsetWidth;
+      element.classList.add(className);
+      clearTimeout(element[`_${className}Timer`]);
+      element[`_${className}Timer`] = setTimeout(() => element.classList.remove(className), duration);
+    }
+
+    function showSaveStamp(label = "Enregistré") {
+      const stamp = $("saveStamp");
+      stamp.textContent = label;
+      pulseClass(stamp, "show", 950);
+      pulseClass($("saveBtn"), "just-saved", 600);
+    }
+
+    function followSummaryText() {
+      const status = $("statusField").value || "À traiter";
+      const risk = $("riskField").value || "Normal";
+      const days = daysUntil($("dueDateField").value);
+      const due = days === null ? "sans échéance" : days < 0 ? `retard ${Math.abs(days)}j` : days === 0 ? "aujourd'hui" : `J-${days}`;
+      const owner = $("ownerField").value.trim();
+      const amount = $("amountField").value.trim();
+      return [status, risk, due, owner || null, amount || null].filter(Boolean).join(" · ");
+    }
+
+    function updateFollowSummary() {
+      $("followSummary").textContent = followSummaryText();
+    }
+
     function updateThemeUI(theme, hint) {
       $("themeChip").textContent = `Thème: ${theme}`;
       $("themeBannerValue").textContent = theme || "Auto";
@@ -1728,6 +1841,7 @@
       $("themeBanner").classList.remove("flash");
       void $("themeBanner").offsetWidth;
       $("themeBanner").classList.add("flash");
+      pulseClass($("themeBanner"), "resolved", 850);
     }
 
     function toDateInputValue(date) {
@@ -1915,6 +2029,8 @@
       const currentCompany = $("company").value;
       const text = `${title} ${note}`;
       $("status").textContent = "Analyse IA en cours...";
+      $("noteSection").classList.add("is-analyzing");
+      $("analyzeAiBtn").disabled = true;
       try {
         const ai = state.apiBaseUrl ? await analyzeViaBackend(title, note) : await analyzeWithOpenAI(title, note);
         const localTheme = detectTheme(text);
@@ -1954,6 +2070,9 @@
       } catch (error) {
         $("status").textContent = `IA indisponible, mode local utilisé`;
         return analyze();
+      } finally {
+        $("noteSection").classList.remove("is-analyzing");
+        $("analyzeAiBtn").disabled = false;
       }
     }
 
@@ -1969,10 +2088,11 @@
       renderNotes();
       renderAlertView();
       $("status").textContent = Number.isInteger(state.editingIndex) ? "Note modifiée" : "Note enregistrée";
+      showSaveStamp(Number.isInteger(state.editingIndex) ? "Mis à jour" : "Enregistré");
       notifyUpcomingDeadlines();
       state.editingIndex = null;
       $("editBanner").classList.remove("active");
-      $("saveBtn").textContent = "Enregistrer la note";
+      $("saveBtn").textContent = "Enregistrer";
     }
 
     function clearCurrentDraft() {
@@ -1986,13 +2106,14 @@
       $("ownerField").value = "";
       $("amountField").value = "";
       $("amountField").dataset.autoAmount = "";
+      updateFollowSummary();
       $("summary").textContent = "Aucune note analysée pour le moment.";
       $("questions").innerHTML = "";
       updateThemeUI("Auto", "Nouvelle page prête");
       $("companyChip").textContent = "Société: -";
       $("status").textContent = "Nouvelle note prête";
       $("editBanner").classList.remove("active");
-      $("saveBtn").textContent = "Enregistrer la note";
+      $("saveBtn").textContent = "Enregistrer";
     }
 
     function newNote() {
@@ -2069,6 +2190,7 @@
       $("dueDateField").value = note.dueDate;
       $("ownerField").value = note.owner;
       $("amountField").value = note.amount;
+      updateFollowSummary();
       $("summary").textContent = note.aiSummary || note.note || "Aucune note saisie.";
       $("questions").innerHTML = (note.aiQuestions || suggestQuestions(note.theme, note.note || ""))
         .map(q => `<div class="item">${escapeHtml(q)}</div>`)
@@ -2078,7 +2200,7 @@
       $("status").textContent = "Note chargée en édition";
       $("editBanner").textContent = `Mode édition: ${note.title || "note sans titre"}`;
       $("editBanner").classList.add("active");
-      $("saveBtn").textContent = "Mettre à jour la note";
+      $("saveBtn").textContent = "Mettre à jour";
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
@@ -2312,6 +2434,7 @@
       const textarea = $("note");
       const base = textarea.value.trim();
       let finalChunk = "";
+      $("dictateBtn").classList.add("is-listening");
       $("status").textContent = "Dictée en cours...";
       showToast("Dictée en cours");
       recognition.onresult = (event) => {
@@ -2327,6 +2450,7 @@
       };
       recognition.onerror = () => {
         $("status").textContent = "Dictée interrompue";
+        $("dictateBtn").classList.remove("is-listening");
       };
       recognition.onend = () => {
         if (finalChunk) {
@@ -2334,6 +2458,7 @@
           textarea.value = merged;
         }
         $("status").textContent = "Dictée terminée";
+        $("dictateBtn").classList.remove("is-listening");
         showToast("Dictée terminée");
       };
       recognition.start();
@@ -2498,6 +2623,11 @@
     $("note").addEventListener("input", updateAmountSuggestion);
     $("amountField").addEventListener("input", () => {
       $("amountField").dataset.autoAmount = "";
+      updateFollowSummary();
+    });
+    ["statusField", "riskField", "dueDateField", "ownerField"].forEach(id => {
+      $(id).addEventListener("input", updateFollowSummary);
+      $(id).addEventListener("change", updateFollowSummary);
     });
     document.addEventListener("keydown", (event) => {
       if (event.ctrlKey && event.key === "Enter") {
