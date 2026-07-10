@@ -1302,7 +1302,12 @@
         order:1;
         position:sticky;
         top:0;
+        display:grid;
         grid-template-columns:repeat(3, 1fr);
+        gap:6px;
+        padding:6px;
+        margin-bottom:10px;
+        z-index:30;
         border-color:#b78b2f;
         background:#101f24;
       }
@@ -1312,7 +1317,7 @@
         color:#f8edcf;
         border-color:rgba(183,139,47,.66);
       }
-      .mobile-tabs a:nth-child(3){display:none}
+      .mobile-tabs a:nth-child(2){display:none}
       .board{order:2}
       #alertsSection{order:3}
       #notesSection{order:4}
@@ -1326,14 +1331,25 @@
       }
       #noteSection{order:1}
       #aiSection{order:2}
+      #aiSection .card-body,
       #alertsSection .card-body,
       #notesSection .filter-grid,
+      #notesSection .ai-search-panel,
+      #notesSection .focus-strip,
       .maintenance-actions{
         display:none;
       }
+      #aiSection .card-head,
       #alertsSection .card-head,
       #notesSection .card-head{
         padding:12px 14px;
+      }
+      #aiSection .card-head h2::after{
+        content:" locale";
+        font-size:12px;
+        font-family:"Trebuchet MS", "Segoe UI", Arial, sans-serif;
+        letter-spacing:.06em;
+        opacity:.8;
       }
       #alertsSection .alert-actions{
         display:none;
@@ -1356,6 +1372,27 @@
       }
       .form-zone-title span:last-child{
         display:none;
+      }
+      #noteSection .form-zone:not(.quick-capture){
+        background:transparent;
+        border:0;
+        box-shadow:none;
+        padding:0;
+      }
+      #noteSection .form-zone:not(.quick-capture) .form-zone-title,
+      #noteSection .form-zone:not(.quick-capture) .meta,
+      #title{
+        display:none;
+      }
+      .mode-toggle{
+        margin-bottom:10px;
+      }
+      .quick-capture{
+        padding:12px;
+        margin-bottom:10px;
+      }
+      #note{
+        min-height:160px;
       }
       .follow-up-panel:not([open])::after,
       details.advanced:not([open])::after{
@@ -1382,10 +1419,18 @@
         padding:9px 7px;
         font-size:12px;
       }
+      #analyzeAiBtn{
+        font-size:0;
+      }
+      #analyzeAiBtn::after{
+        content:"Classer";
+        font-size:12px;
+      }
       .note-actions .btn.save-wide{
         min-height:54px;
         font-size:15px;
       }
+      .follow-up-panel,
       details.advanced{
         margin-top:12px;
       }
@@ -2506,6 +2551,22 @@
       return text;
     }
 
+    function isMobileViewport() {
+      return window.matchMedia?.("(max-width: 720px)").matches || window.innerWidth <= 720;
+    }
+
+    function canUseRemoteAi() {
+      return Boolean(state.apiBaseUrl || state.openaiKey);
+    }
+
+    function analyzeLocalWithModeLabel(label = "IA locale mobile") {
+      const note = analyze();
+      $("status").textContent = label;
+      updateThemeUI(note.theme || "Auto", label);
+      showToast(label);
+      return note;
+    }
+
     function analyze() {
       const title = $("title").value.trim();
       const note = $("note").value.trim();
@@ -2548,6 +2609,7 @@
       const note = $("note").value.trim();
       const currentCompany = $("company").value;
       const text = `${title} ${note}`;
+      if (!canUseRemoteAi()) return analyzeLocalWithModeLabel(isMobileViewport() ? "IA locale mobile" : "IA locale");
       $("status").textContent = "Analyse IA en cours...";
       $("noteSection").classList.add("is-analyzing");
       $("analyzeAiBtn").disabled = true;
@@ -3251,6 +3313,7 @@
         apiBaseUrl: state.apiBaseUrl,
         mailBackendUrl: state.mailBackendUrl
       }));
+      updateAiModeLabel();
       $("status").textContent = "Clé OpenAI enregistrée localement";
       showToast("Paramètres enregistrés");
     }
@@ -3271,6 +3334,17 @@
       $("status").textContent = "Export JSON prêt";
     }
 
+    function updateAiModeLabel() {
+      if (isMobileViewport() && !canUseRemoteAi()) {
+        $("status").textContent = "IA locale mobile active";
+        $("analyzeAiBtn").title = "Classe la note avec l'analyse locale mobile";
+      } else if (!canUseRemoteAi()) {
+        $("analyzeAiBtn").title = "Classe la note avec l'analyse locale";
+      } else {
+        $("analyzeAiBtn").title = "Analyse via OpenAI ou backend IA";
+      }
+    }
+
     await loadCompaniesFromJson();
     restore();
     refreshCompanySelects();
@@ -3279,6 +3353,7 @@
     $("openaiModel").value = state.openaiModel;
     $("apiBaseUrl").value = state.apiBaseUrl;
     $("mailBackendUrl").value = state.mailBackendUrl;
+    updateAiModeLabel();
 
     $("analyzeAiBtn").addEventListener("click", analyzeSmart);
     $("saveBtn").addEventListener("click", saveCurrent);
